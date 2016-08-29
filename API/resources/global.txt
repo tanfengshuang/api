@@ -1,0 +1,106 @@
+*** Settings ***
+Library         BuiltIn
+Library         OperatingSystem
+Library         String
+Library         Collections
+#Library         RequestsLibrary
+Library         ../libs/Account_Utils.py
+
+
+*** Variables ***
+${HEAD}            {'content-type':'application/json'}
+
+${URL}              http://10.3.12.152
+${NEW_URL}          ${URL}/account/new
+${ADD_URL}       	${URL}/account/attach
+${GET_URL}          ${URL}/account/get
+${REFRESH_URL}      ${URL}/account/refresh
+${SEARCH_URL}       ${URL}/search
+${ACTIVATE_URL}		${URL}/account/activate
+
+${EXISTING_USERNAME}    aaa 
+${PASSWORD}             redhat
+${WRONG_PASSWORD}       redhat111
+${SKU}                  RH0103708
+${SKUS}                 RH0103708,MCT1316F3,MCT1339 
+${INVALID_SKU}			RH0103708AAA
+${INVALID_SKUS}			RH0103708AAA,MCT1316F3BBB
+${SPECIAL_SKU}			MCT0891
+${SPECIAL_SKUS}			MCT0891,MCT0892,MCT0992
+${JBOSS_SKUS}			MW0167254,MW0267188,MW0341364
+${QUANTITY}             100
+${STRING_QUANTITY}		string
+${NEGTIVE_QUANTITY}     -1 
+${UNLIMITED_QUANTITY}	unlimited
+
+${HEADERS}              application/x-www-form-urlencoded
+
+${FIRST_NAME}           Fengshuang
+${LAST_NAME}            Tan
+
+*** Keywords ***
+Generate Username
+    [Documentation]
+    [Tags]    global
+    ${time}    Get Time    epoch
+    ${random_str}=    Generate Random String    length=4    chars=[LOWER]
+    ${username}=    Catenate    user${time}${random_str}
+    #${create_info}    Create Dictionary     username=${username}    password=${password}
+    [Return]    ${username}
+
+Create account with accepting terms
+	[Documentation]
+    ${TEST_USERNAME}=     Generate username
+    ${CREATE_INFO}=  Create Dictionary     username=${TEST_USERNAME}    password=${PASSWORD}
+    ${STATUS}    ${MSG}=    POST    ${NEW_URL}    ${CREATE_INFO}
+    ${SUCCESS_MSG}=		Catenate	Account '${TEST_USERNAME}' created
+    Should Be Equal     ${STATUS}    200
+    Should Contain      ${MSG}      ${SUCCESS_MSG}
+    Activate account	${TEST_USERNAME}	${PASSWORD}
+    Refresh account		${TEST_USERNAME}	${PASSWORD}
+    #${STATUS}	Verify Activate		${TEST_USERNAME}	${PASSWORD}
+    #Should Be Equal     ${STATUS}    0
+    [Return]	${TEST_USERNAME}
+
+Create account without accepting terms
+	[Documentation]
+    ${TEST_USERNAME}=     Generate username
+    ${CREATE_INFO}=  Create Dictionary     username=${TEST_USERNAME}    password=${PASSWORD}
+    ${STATUS}    ${MSG}=    POST    ${NEW_URL}    ${CREATE_INFO}
+    ${SUCCESS_MSG}=		Catenate	Account '${TEST_USERNAME}' created
+    Should Be Equal     ${STATUS}    200
+    Should Contain      ${MSG}      ${SUCCESS_MSG}
+    Add SKU		${TEST_USERNAME}	${PASSWORD}	${SKU}	${QUANTITY}
+    ${STATUS}=	Verify Activate		${TEST_USERNAME}	${PASSWORD}
+    Should Be Equal     ${STATUS}    1
+    [Return]	${TEST_USERNAME}  
+      
+Activate Account
+	[Documentation]
+	[Arguments]   ${USERNAME}	${PASSWORD}
+	${ACTIVATE_INFO}=  Create Dictionary     username=${USERNAME}    password=${PASSWORD}
+    ${STATUS}    ${MSG}=    POST     ${ACTIVATE_URL}    ${ACTIVATE_INFO}
+    ${SUCCESS_MSG}=		Catenate	Terms and Conditions for account '${USERNAME}' were successfully accepted
+    Should Be Equal     ${STATUS}    200
+    Should Be Equal     ${MSG}      ${SUCCESS_MSG}
+    ${STATUS}=	Verify Activate		${USERNAME}	${PASSWORD}
+    Should Be Equal     ${STATUS}    0    
+    
+Refresh Account
+	[Documentation]
+	[Arguments]   ${USERNAME}	${PASSWORD}
+	${REFRESH_INFO}=  Create Dictionary     username=${USERNAME}    password=${PASSWORD}
+    ${STATUS}    ${MSG}=    POST     ${REFRESH_URL}    ${REFRESH_INFO}
+    Should Be Equal     ${STATUS}    200
+
+Add SKU
+	[Documentation]
+	[Arguments]   ${USERNAME}	${PASSWORD}	${SKU}	${QUANTITY}
+	@{SKU_LIST}=	Split String	${SKU}	,
+	${QUANTITY}=	Convert To Integer	${QUANTITY}
+    ${ADD_INFO}=  Create Dictionary     username=${USERNAME}    password=${PASSWORD}     sku=${SKU_LIST}      quantity=${QUANTITY}
+    ${STATUS}    ${MSG}=    POST    ${ADD_URL}   ${ADD_INFO}
+    Should Be Equal     ${STATUS}    200
+    # These SKUs have been attached to 'user1471170606aonb' account: [u'RH0103708', u'MCT1316F3', u'MCT1339']
+    ${SUCCESS_MSG}=		Catenate	These SKUs have been attached to '${USERNAME}' account: @{SKU_LIST}
+    Should Contain      ${MSG}      ${SUCCESS_MSG}	    
