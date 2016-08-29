@@ -1,0 +1,14 @@
+*.pyc
+*.crt
+*.key
+*.pem
+*.log
+*.html
+*.xml
+*.json
+*.idea
+*.properties
+*.props
+log/
+env/
+.DS_Store
