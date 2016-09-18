@@ -65,13 +65,14 @@ Search missing value
 	Should Be Equal     ${STATUS}      400
 	Should Be Equal     ${MSG}	${SUCCESS_MSG}
 	
-Search by Product Hierarchy: Product Name with ALL Product
+Search by Product Hierarchy: Product Name with ALL skus
     [Documentation]
     [Tags]    regression
-    ${CONDITION}=       Create Dictionary    key=ph_product_name    operator=equals	value=all
-	${SEARCH_INFO}=     Create List     ${CONDITION}
+	${SEARCH_INFO}=     Create List     
 	${STATUS}  ${MSG}=     POST   ${SEARCH_URL}	${SEARCH_INFO}
 	Should Be Equal     ${STATUS}      200
+	${length}= 	Get Length 	${MSG}
+	Should Be True	${length} > 10000
     
 Search by Product Hierarchy: Product Name with one product
     [Documentation]	(such as Academic)
@@ -153,8 +154,9 @@ Advanced Search - Test 2 filters
 Advanced Search - Test 3 filters
     [Documentation]
     [Tags]    regression
+    ${virt_limit_integer}=	Convert To Integer	4
     ${CONDITION1}=      Create Dictionary    key=ph_product_name    operator=equals  value=Academic 
-    ${CONDITION2}=		Create Dictionary	 key=virt_limit    operator=equals  value=4
+    ${CONDITION2}=		Create Dictionary	 key=virt_limit    operator=equals  value=${virt_limit_integer}
     ${CONDITION3}=		Create Dictionary	 key=id    operator=equals  value=MCT0834
 	${SEARCH_INFO}=     Create List     ${CONDITION1}	${CONDITION2}	${CONDITION3}
 	${STATUS}  ${MSG}=     POST   ${SEARCH_URL}	${SEARCH_INFO}
@@ -166,9 +168,11 @@ Advanced Search - Test 3 filters
 Advanced Search - Test 4 filters
     [Documentation]
     [Tags]    regression
+    ${virt_limit_integer}=	Convert To Integer	4
+    ${sockets_integer}=	Convert To Integer	2
     ${CONDITION1}=      Create Dictionary    key=ph_product_name    operator=equals  value=Academic 
-    ${CONDITION2}=		Create Dictionary	 key=virt_limit    operator=equals  value=4
-    ${CONDITION3}=		Create Dictionary	 key=sockets    operator=equals  value=2
+    ${CONDITION2}=		Create Dictionary	 key=virt_limit    operator=equals  value=${virt_limit_integer}
+    ${CONDITION3}=		Create Dictionary	 key=sockets    operator=equals  value=${sockets_integer}
     ${CONDITION4}=		Create Dictionary	 key=id    operator=equals  value=MCT0834
 	${SEARCH_INFO}=     Create List     ${CONDITION1}	${CONDITION2}	${CONDITION3}	${CONDITION4}
 	${STATUS}  ${MSG}=     POST   ${SEARCH_URL}	${SEARCH_INFO}
@@ -180,10 +184,13 @@ Advanced Search - Test 4 filters
 Advanced Search - Test 5 filters
     [Documentation]
     [Tags]    regression
+    ${virt_limit_integer}=	Convert To Integer	4
+    ${sockets_integer}=	Convert To Integer	2
+    ${multiplier_integer}=	Convert To Integer	16
     ${CONDITION1}=       Create Dictionary    key=ph_product_name    operator=equals  value=Academic 
-    ${CONDITION2}=		Create Dictionary	 key=virt_limit    operator=equals  value=4
-    ${CONDITION3}=		Create Dictionary	 key=sockets    operator=equals  value=2
-    ${CONDITION4}=		Create Dictionary	 key=multiplier    operator=equals  value=16
+    ${CONDITION2}=		Create Dictionary	 key=virt_limit    operator=equals  value=${virt_limit_integer}
+    ${CONDITION3}=		Create Dictionary	 key=sockets    operator=equals  value=${sockets_integer}
+    ${CONDITION4}=		Create Dictionary	 key=multiplier    operator=equals  value=${multiplier_integer}
     ${CONDITION5}=		Create Dictionary	 key=id    operator=equals  value=MCT0834
 	${SEARCH_INFO}=     Create List     ${CONDITION1}	${CONDITION2}	${CONDITION3}	${CONDITION4}	${CONDITION5}
 	${STATUS}  ${MSG}=     POST   ${SEARCH_URL}	${SEARCH_INFO}
@@ -435,9 +442,9 @@ Advanced Search with Integer attribute - equals n/a
     ${CONDITION}=       Create Dictionary    key=virt_limit    operator=equals		value=n/a
 	${SEARCH_INFO}=     Create List     ${CONDITION}
 	${STATUS}  ${MSG}=     POST   ${SEARCH_URL}		${SEARCH_INFO}
-	Should Be Equal     ${STATUS}      200
-	${length}= 	Get Length 	${MSG} 
-	Should Be Equal As Integers     ${length}	0
+	Should Be Equal     ${STATUS}      400
+	${SUCCESS_MSG}= 	Set Variable	'{u'operator': u'equals', u'value': u'n/a', u'key': u'virt_limit'}' is not a valid query
+	Should Be Equal		${MSG}	${SUCCESS_MSG}
 
 Advanced Search with Integer attribute - equals unlimited
     [Documentation]
@@ -454,9 +461,9 @@ Advanced Search with Integer attribute - equals unlimited
     ${CONDITION}=       Create Dictionary    key=virt_limit    operator=equals		value=unlimited
 	${SEARCH_INFO}=     Create List     ${CONDITION}
 	${STATUS}  ${MSG}=     POST   ${SEARCH_URL}		${SEARCH_INFO}
-	Should Be Equal     ${STATUS}      200
-	${length}= 	Get Length 	${MSG} 
-	Should Be Equal As Integers     ${length}	0
+	Should Be Equal     ${STATUS}      400
+	${SUCCESS_MSG}= 	Set Variable	'{u'operator': u'equals', u'value': u'unlimited', u'key': u'virt_limit'}' is not a valid query
+	Should Be Equal		${MSG}	${SUCCESS_MSG}
 	
 Advanced Search with Integer attribute - equals an integer number
     [Documentation]
@@ -470,14 +477,15 @@ Advanced Search with Integer attribute - equals an integer number
     ...	unlimited 
     [Tags]    regression
 	Log	equals an integer number
-	${CONDITION}=       Create Dictionary    key=virt_limit    operator=equals		value=4
+	${virt_limit_integer}=	Convert To Integer	4
+	${CONDITION}=       Create Dictionary    key=virt_limit    operator=equals		value=${virt_limit_integer}
 	${SEARCH_INFO}=     Create List     ${CONDITION}
 	${STATUS}  ${MSG}=     POST   ${SEARCH_URL}		${SEARCH_INFO}
 	Should Be Equal     ${STATUS}      200
 	${length}= 	Get Length 	${MSG} 
 	:For	${i}	IN	@{MSG}
 	\	Log		${i['id']} ${i['virt_limit']}
-	\	Should Be Equal     ${i['virt_limit']}     4
+	\	Should Be Equal As Integers     ${i['virt_limit']}     ${virt_limit_integer}
 
 Advanced Search with Integer attribute - does not equal an integer number
     [Documentation]
@@ -490,16 +498,16 @@ Advanced Search with Integer attribute - does not equal an integer number
     ...	applicable
     ...	unlimited 
     [Tags]    regression
-    # does not equal
-    Log	does not equal
-    ${CONDITION}=       Create Dictionary    key=virt_limit    operator=does not equal  value=20
+    Log	does not equal an integer number
+    ${virt_limit_integer}=	Convert To Integer	20
+    ${CONDITION}=       Create Dictionary    key=virt_limit    operator=does not equal  value=${virt_limit_integer}
 	${SEARCH_INFO}=     Create List     ${CONDITION}
 	${STATUS}  ${MSG}=     POST   ${SEARCH_URL}		${SEARCH_INFO}
 	Should Be Equal     ${STATUS}      200
 	${length}= 	Get Length 	${MSG} 
 	:For	${i}	IN	@{MSG}
 	\	Log		${i['id']} ${i['virt_limit']}
-	\	Should Not Be Equal     ${i['virt_limit']}  20
+	\	Should Not Be Equal	${i['virt_limit']}  20
 
 Advanced Search with Integer attribute - does not equal n/a
     [Documentation]
@@ -512,16 +520,13 @@ Advanced Search with Integer attribute - does not equal n/a
     ...	applicable
     ...	unlimited 
     [Tags]    regression
-    # equals
     Log	does not equal n/a
     ${CONDITION}=       Create Dictionary    key=virt_limit    operator=does not equal		value=n/a
 	${SEARCH_INFO}=     Create List     ${CONDITION}
 	${STATUS}  ${MSG}=     POST   ${SEARCH_URL}		${SEARCH_INFO}
-	Should Be Equal     ${STATUS}      200
-	${length}= 	Get Length 	${MSG} 
-	:For	${i}	IN	@{MSG}
-	\	Log		${i['id']} ${i['virt_limit']}
-	\	Should Not Contain     ${i['virt_limit']}     n/a
+	Should Be Equal     ${STATUS}      400
+	${SUCCESS_MSG}= 	Set Variable	'{u'operator': u'does not equal', u'value': u'n/a', u'key': u'virt_limit'}' is not a valid query
+	Should Be Equal		${MSG}	${SUCCESS_MSG}
 
 Advanced Search with Integer attribute - does not equal unlimited
     [Documentation]
@@ -538,11 +543,9 @@ Advanced Search with Integer attribute - does not equal unlimited
     ${CONDITION}=       Create Dictionary    key=virt_limit    operator=does not equal		value=unlimited
 	${SEARCH_INFO}=     Create List     ${CONDITION}
 	${STATUS}  ${MSG}=     POST   ${SEARCH_URL}		${SEARCH_INFO}
-	Should Be Equal     ${STATUS}      200
-	${length}= 	Get Length 	${MSG} 
-	:For	${i}	IN	@{MSG}
-	\	Log		${i['id']} ${i['virt_limit']}
-	\	Should Not Contain     ${i['virt_limit']}     unlimited
+	Should Be Equal     ${STATUS}      400
+	${SUCCESS_MSG}= 	Set Variable	'{u'operator': u'does not equal', u'value': u'unlimited', u'key': u'virt_limit'}' is not a valid query
+	Should Be Equal		${MSG}	${SUCCESS_MSG}
     
 Advanced Search with Integer attribute - greater than an integer number
     [Documentation]
@@ -555,16 +558,16 @@ Advanced Search with Integer attribute - greater than an integer number
     ...	applicable
     ...	unlimited 
     [Tags]    regression
-    # greater than
-    Log	greater than
-    ${CONDITION}=       Create Dictionary    key=sockets    operator=greater than  value=20
+    Log	greater than an integer number
+    ${sockets_integer}=	Convert To Integer	20
+    ${CONDITION}=       Create Dictionary    key=sockets    operator=greater than  value=${sockets_integer}
 	${SEARCH_INFO}=     Create List     ${CONDITION}
 	${STATUS}  ${MSG}=     POST   ${SEARCH_URL}		${SEARCH_INFO}
 	Should Be Equal     ${STATUS}      200
 	${length}= 	Get Length 	${MSG} 
 	:For	${i}	IN	@{MSG}
 	\	Log		${i['id']} ${i['sockets']}
-	\	Should Be True     ${i['sockets']} > 20
+	\	Should Be True     ${i['sockets']} > ${sockets_integer}
 
 Advanced Search with Integer attribute - greater than n/a
     [Documentation]
@@ -582,11 +585,9 @@ Advanced Search with Integer attribute - greater than n/a
     ${CONDITION}=       Create Dictionary    key=sockets    operator=greater than  value=n/a
 	${SEARCH_INFO}=     Create List     ${CONDITION}
 	${STATUS}  ${MSG}=     POST   ${SEARCH_URL}		${SEARCH_INFO}
-	Should Be Equal     ${STATUS}      200
-	${length}= 	Get Length 	${MSG} 
-	#:For	${i}	IN	@{MSG}
-	#\	Run keyword if	${i['sockets']} == 'n/a'			Log		${i['id']} ${i['sockets']}
-	#\	Run keyword if	${i['sockets']} == 'ulimited'		Log		${i['id']} ${i['sockets']}
+	Should Be Equal     ${STATUS}      400
+	${SUCCESS_MSG}= 	Set Variable	'{u'operator': u'greater than', u'value': u'n/a', u'key': u'sockets'}' is not a valid query
+	Should Be Equal		${MSG}	${SUCCESS_MSG}
 
 Advanced Search with Integer attribute - greater than unlimited
     [Documentation]
@@ -604,10 +605,9 @@ Advanced Search with Integer attribute - greater than unlimited
     ${CONDITION}=       Create Dictionary    key=sockets    operator=greater than  value=unlimited
 	${SEARCH_INFO}=     Create List     ${CONDITION}
 	${STATUS}  ${MSG}=     POST   ${SEARCH_URL}		${SEARCH_INFO}
-	Should Be Equal     ${STATUS}      200
-	${length}= 	Get Length 	${MSG} 
-	#:For	${i}	IN	@{MSG}
-	#\	Log		${i['id']} ${i['sockets']}
+	Should Be Equal     ${STATUS}      400
+	${SUCCESS_MSG}= 	Set Variable	'{u'operator': u'greater than', u'value': u'unlimited', u'key': u'sockets'}' is not a valid query
+	Should Be Equal		${MSG}	${SUCCESS_MSG}
 
 Advanced Search with Integer attribute - less then an integer number
     [Documentation]
@@ -622,14 +622,15 @@ Advanced Search with Integer attribute - less then an integer number
     [Tags]    regression
     # less then
     Log	less then
-    ${CONDITION}=       Create Dictionary    key=sockets    operator=less then		value=128
+    ${sockets_integer}=	Convert To Integer	128
+    ${CONDITION}=       Create Dictionary    key=sockets    operator=less then		value=${sockets_integer}
 	${SEARCH_INFO}=     Create List     ${CONDITION}
 	${STATUS}  ${MSG}=     POST   ${SEARCH_URL}		${SEARCH_INFO}
 	Should Be Equal     ${STATUS}      200
 	${length}= 	Get Length 	${MSG} 
 	:For	${i}	IN	@{MSG}
 	\	Log		${i['id']} ${i['sockets']}
-	\	Should Be True     ${i['sockets']} < 128
+	\	Should Be True     ${i['sockets']} < ${sockets_integer}
 
 Advanced Search with Integer attribute - less then n/a
     [Documentation]
@@ -647,10 +648,9 @@ Advanced Search with Integer attribute - less then n/a
     ${CONDITION}=       Create Dictionary    key=sockets    operator=less then		value=n/a
 	${SEARCH_INFO}=     Create List     ${CONDITION}
 	${STATUS}  ${MSG}=     POST   ${SEARCH_URL}		${SEARCH_INFO}
-	Should Be Equal     ${STATUS}      200
-	${length}= 	Get Length 	${MSG} 
-	:For	${i}	IN	@{MSG}
-	\	Log		${i['id']} ${i['sockets']}
+	Should Be Equal     ${STATUS}      400
+	${SUCCESS_MSG}= 	Set Variable	'{u'operator': u'less then', u'value': u'n/a', u'key': u'sockets'}' is not a valid query
+	Should Be Equal		${MSG}	${SUCCESS_MSG}
 
 Advanced Search with Integer attribute - less then unlimited
     [Documentation]
@@ -668,10 +668,9 @@ Advanced Search with Integer attribute - less then unlimited
     ${CONDITION}=       Create Dictionary    key=sockets    operator=less then		value=unlimited
 	${SEARCH_INFO}=     Create List     ${CONDITION}
 	${STATUS}  ${MSG}=     POST   ${SEARCH_URL}		${SEARCH_INFO}
-	Should Be Equal     ${STATUS}      200
-	${length}= 	Get Length 	${MSG} 
-	:For	${i}	IN	@{MSG}
-	\	Log		${i['id']} ${i['sockets']}
+	Should Be Equal     ${STATUS}      400
+	${SUCCESS_MSG}= 	Set Variable	'{u'operator': u'less then', u'value': u'unlimited', u'key': u'sockets'}' is not a valid query
+	Should Be Equal		${MSG}	${SUCCESS_MSG}
 
 Advanced Search with Integer attribute - empty or not applicable
     [Documentation]
@@ -743,7 +742,8 @@ Advanced Search with Boolean attribute - equals True
     [Documentation]	Boolean attribute:	such as, virt_only is True
     ...	operator: equals
     [Tags]    regression
-    ${CONDITION}=       Create Dictionary    key=virt_only    operator=equals	value=True
+    ${boolean_true}=	Convert To Boolean	True
+    ${CONDITION}=       Create Dictionary    key=virt_only    operator=equals	value=${boolean_true}
 	${SEARCH_INFO}=     Create List     ${CONDITION}
 	${STATUS}  ${MSG}=     POST   ${SEARCH_URL}		${SEARCH_INFO}
 	Should Be Equal     ${STATUS}      200
@@ -756,7 +756,8 @@ Advanced Search with Boolean attribute - equals False
     [Documentation]	Boolean attribute:	such as, virt_only is True
     ...	operator: equals
     [Tags]    regression
-    ${CONDITION}=       Create Dictionary    key=virt_only    operator=equals	value=False
+    ${boolean_false}=	Convert To Boolean	False
+    ${CONDITION}=       Create Dictionary    key=virt_only    operator=equals	value=${boolean_false}
 	${SEARCH_INFO}=     Create List     ${CONDITION}
 	${STATUS}  ${MSG}=     POST   ${SEARCH_URL}		${SEARCH_INFO}
 	Should Be Equal     ${STATUS}      200
@@ -769,7 +770,9 @@ Advanced Search with Boolean attribute - equals 1
     [Documentation]	Boolean attribute:	such as, virt_only is True
     ...	operator: equals
     [Tags]    regression
-    ${CONDITION}=       Create Dictionary    key=virt_only    operator=equals	value=1
+    ${integer_number}=	Convert To Integer	1
+    ${boolean_true}=	Convert To Boolean	${integer_number}
+    ${CONDITION}=       Create Dictionary    key=virt_only    operator=equals	value=${boolean_true}
 	${SEARCH_INFO}=     Create List     ${CONDITION}
 	${STATUS}  ${MSG}=     POST   ${SEARCH_URL}		${SEARCH_INFO}
 	Should Be Equal     ${STATUS}      200
@@ -782,18 +785,24 @@ Advanced Search with Boolean attribute - equals 8000
     [Documentation]	Boolean attribute:	such as, virt_only is True
     ...	operator: equals
     [Tags]    regression
-    ${CONDITION}=       Create Dictionary    key=virt_only    operator=equals	value=8000
+    ${integer_number}=	Convert To Integer	8000
+    ${boolean_true}=	Convert To Boolean	${integer_number}
+    ${CONDITION}=       Create Dictionary    key=virt_only    operator=equals	value=${boolean_true}
 	${SEARCH_INFO}=     Create List     ${CONDITION}
 	${STATUS}  ${MSG}=     POST   ${SEARCH_URL}		${SEARCH_INFO}
 	Should Be Equal     ${STATUS}      200
 	${length}= 	Get Length 	${MSG} 
-	Should Be Equal As Integers     ${length}     0
+	:For	${i}	IN	@{MSG}
+	\	Log		${i['id']} ${i['virt_only']}
+	\	Should Be Equal     ${i['virt_only']}     True
 	
 Advanced Search with Boolean attribute - equals 0
     [Documentation]	Boolean attribute:	such as, virt_only is True
     ...	operator: equals
     [Tags]    regression
-    ${CONDITION}=       Create Dictionary    key=virt_only    operator=equals	value=0
+    ${integer_zero}=	Convert To Integer	0
+    ${boolean_false}=	Convert To Boolean	${integer_zero}
+    ${CONDITION}=       Create Dictionary    key=virt_only    operator=equals	value=${boolean_false}
 	${SEARCH_INFO}=     Create List     ${CONDITION}
 	${STATUS}  ${MSG}=     POST   ${SEARCH_URL}		${SEARCH_INFO}
 	Should Be Equal     ${STATUS}      200
@@ -834,11 +843,12 @@ Advanced Search with String attribute is applicable and empty or not applicable
 	${length}= 	Get Length 	${MSG} 
 	Should Be Equal As Integers		${length}	0
     
-Advanced Search with Integer attribute is equals and does not equal
+Advanced Search with Integer attribute equals and does not equal
     [Documentation]
     [Tags]    regression
-    ${CONDITION1}=       Create Dictionary    key=sockets    operator=equals  value=20
-    ${CONDITION2}=       Create Dictionary    key=sockets    operator=does not equal  value=20
+    ${sockets_integer}=		Convert to Integer	20
+    ${CONDITION1}=       Create Dictionary    key=sockets    operator=equals  value=${sockets_integer}
+    ${CONDITION2}=       Create Dictionary    key=sockets    operator=does not equal  value=${sockets_integer}
 	${SEARCH_INFO}=     Create List     ${CONDITION1}	${CONDITION2}
 	${STATUS}  ${MSG}=     POST   ${SEARCH_URL}		${SEARCH_INFO}
 	Should Be Equal     ${STATUS}      200
@@ -859,8 +869,9 @@ Advanced Search with Integer attribute is applicable and empty or not applicable
 Advanced Search with Integer attribute is less than and greater than one same number
     [Documentation]
     [Tags]    regression
-    ${CONDITION1}=       Create Dictionary    key=sockets    operator=greater than	value=20
-    ${CONDITION2}=       Create Dictionary    key=sockets    operator=less then	value=20
+    ${sockets_integer}=		Convert to Integer	20
+    ${CONDITION1}=       Create Dictionary    key=sockets    operator=greater than	value=${sockets_integer}
+    ${CONDITION2}=       Create Dictionary    key=sockets    operator=less then	value=${sockets_integer}
 	${SEARCH_INFO}=     Create List     ${CONDITION1}	${CONDITION2}
 	${STATUS}  ${MSG}=     POST   ${SEARCH_URL}		${SEARCH_INFO}
 	Should Be Equal     ${STATUS}      200
@@ -870,112 +881,15 @@ Advanced Search with Integer attribute is less than and greater than one same nu
 Advanced Search with Boolean attribute is False and True
     [Documentation]	such as, Virt-only is False and Virt-only is True
     [Tags]    regression
-    ${CONDITION1}=       Create Dictionary    key=multi_entitlement    operator=equals	value=True
-    ${CONDITION2}=       Create Dictionary    key=multi_entitlement    operator=equals	value=False
+    ${boolean_true}=	Convert To Boolean	True
+    ${boolean_false}=	Convert To Boolean	False
+    ${CONDITION1}=       Create Dictionary    key=multi_entitlement    operator=equals	value=${boolean_true}
+    ${CONDITION2}=       Create Dictionary    key=multi_entitlement    operator=equals	value=${boolean_false}
 	${SEARCH_INFO}=     Create List     ${CONDITION1}	${CONDITION2}
 	${STATUS}  ${MSG}=     POST   ${SEARCH_URL}		${SEARCH_INFO}
 	Should Be Equal     ${STATUS}      200
 	${length}= 	Get Length 	${MSG} 
 	Should Be Equal As Integers		${length}	0
-    
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 	
 *** Keywords ***
-Search by Product Hierarchy: Product Name with ALL Product
-    [Documentation] 
-    [Tags]     default
-
-Search by Product Hierarchy: Product Name with Data Grid
-    [Documentation] 
-    [Tags]     default
-
-Search by SKU with nothing
-    [Documentation] 
-    [Tags]     default
-
-Search by SKU with existing sku
-    [Documentation] 
-    [Tags]     default
-    
-Search by SKU with not existing sku
-    [Documentation] 
-    [Tags]     default
-    
-Search with SKU Name equals
-	${condition}       Create Dictionary    key=id    operator=equals  value=RH0103708
-	${search_info}     Create List     ${condition}
-	${status}  ${msg}=     POST   ${search_url}	${search_info}
-	Should Be Equal     ${status}      200
-	
-Search with SKU Name contains
-    [Documentation] 
-	[Tags]     default
-	${condition}       Create Dictionary    key=id    operator=contains  value=RH0103708
-    ${search_info}     Create List     ${condition}
-    ${status}  ${msg}=     POST   ${search_url}    ${search_info}
-    Should Be Equal     ${status}      200
-
-Search with SKU Name doesn't contain
-    [Documentation] 
-	[Tags]     default
-	${condition}       Create Dictionary    key=id    operator=does not contain  value=RH
-    ${search_info}     Create List     ${condition}
-    ${status}  ${msg}=     POST   ${search_url}    ${search_info}
-    Should Be Equal     ${status}      200
-	
-Search with SKU Name invalid operator
-    [Documentation] 
-    [Tags]      default
-    ${condition}       Create Dictionary    key=id    operator=invalid operator  value=RH
-    ${search_info}     Create List     ${condition}
-    ${status}  ${msg}=     POST   ${search_url}    ${search_info}
-    Should Be Equal     ${status}      400
-    Should Contain      ${msg}         is not a valid query
     	

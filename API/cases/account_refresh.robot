@@ -76,7 +76,8 @@ Refresh account with existing username and null password
     [Tags]    regression
     ${REFRESH_INFO}=  Create Dictionary     username=${EXISTING_USERNAME}    password=
     ${STATUS}    ${MSG}=    POST     ${REFRESH_URL}    ${REFRESH_INFO}
-    ${SUCCESS_MSG}=		Catenate	Unable to verify credentials for account '${EXISTING_USERNAME}'
+    #${SUCCESS_MSG}=		Catenate	Unable to verify credentials for account '${EXISTING_USERNAME}'
+    ${SUCCESS_MSG}=		Catenate	Bad request: Value of 'password' parameter is not valid input, reason: Password must be in range of 1-25 characters
     Should Be Equal     ${STATUS}    400
     Should Be Equal     ${MSG}      ${SUCCESS_MSG}
     
@@ -96,17 +97,19 @@ Refresh account with null username and password
     ${REFRESH_INFO}=  Create Dictionary     username=    password=${PASSWORD}
     ${STATUS}    ${MSG}=    POST     ${REFRESH_URL}    ${REFRESH_INFO}
     ${SUCCESS_MSG}=		Set Variable	Unable to verify credentials for account ''
+    ${SUCCESS_MSG}=		Set Variable	Bad request: Value of 'username' parameter is not valid input, reason: Login must be at least 5 characters long (up to 255)
     Should Be Equal     ${STATUS}    400
-    Should Be Equal     ${MSG}      ${SUCCESS_MSG}
+    Should Contain		${MSG}      ${SUCCESS_MSG}
         
 Refresh account with null username and null password   
     [Documentation]
     [Tags]    regression
     ${REFRESH_INFO}=  Create Dictionary     username=    password=
     ${STATUS}    ${MSG}=    POST     ${REFRESH_URL}    ${REFRESH_INFO}
-    ${SUCCESS_MSG}=		Set Variable	Unable to verify credentials for account ''
+    #${SUCCESS_MSG}=		Set Variable	Unable to verify credentials for account ''
+    ${SUCCESS_MSG}=		Set Variable	Bad request: Value of 'username' parameter is not valid input, reason: Login must be at least 5 characters long (up to 255)
     Should Be Equal     ${STATUS}    400
-    Should Be Equal     ${MSG}      ${SUCCESS_MSG}  
+    Should Contain		${MSG}      ${SUCCESS_MSG}  
 
 Refresh account with nothing
     [Documentation]

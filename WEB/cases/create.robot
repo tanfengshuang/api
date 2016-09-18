@@ -1,34 +1,30 @@
 *** Settings ***
 Documentation     Attach subscriptions
 Resource          ../resources/global.robot
-Suite Setup       Open Browser  ${FRONT_PAGE}   ${BROWSER}
-Suite Teardown    Close All Browsers
+Suite Setup	Suite Setup Steps
+Test Setup	Test Setup Steps
+Test Teardown	Test Teardown Steps
+Suite Teardown	Suite Teardown Steps
 
 *** Variables ***
 
 *** Test Cases ***
-Create accounts - check url location
+Create account - verify url location
     [Documentation] 
 	[Tags]     regression
-	Open Account Test Page		Create Account
-    Page should contain   Create account
-	${location}=	Get location
+	Location Should Be	${CREATE_PAGE}
 	    
-Create accounts - check required field
+Create account - verify required fields
     [Documentation] 
 	[Tags]     regression
-	Open Account Test Page		Create Account
-    Page should contain   Create account
 	${REQUIRED}=	Get Element Attribute	username@required
 	Should Be Equal		${REQUIRED}		true
 	${REQUIRED}=	Get Element Attribute	password@required
 	Should Be Equal		${REQUIRED}		true
 
-Create accounts - check optional field
+Create account - verify optional fields
 	[Documentation] 
 	[Tags]     regression
-	Open Account Test Page		Create Account
-    Page should contain   Create account
 	${OPTIONAL}=	Get Element Attribute	first_name@required
 	Should Be Equal As Strings		${OPTIONAL}		None
 	${OPTIONAL}=	Get Element Attribute	last_name@required
@@ -40,11 +36,9 @@ Create accounts - check optional field
 	${OPTIONAL}=	Get Element Attribute	terms@required
 	Should Be Equal As Strings		${OPTIONAL}		None
 	
-Create accounts - check input default info
+Create account - verify input text default info
 	[Documentation] 
 	[Tags]     regression
-	Open Account Test Page		Create Account
-    Page should contain   Create account
 	${INFO}=	Get Element Attribute	username@placeholder
 	Should Be Equal		${INFO}		login
 	${INFO}=	Get Element Attribute	password@placeholder
@@ -54,154 +48,210 @@ Create accounts - check input default info
 	${INFO}=	Get Element Attribute	last_name@placeholder
 	Should Be Equal		${INFO}		(optional)
 	${INFO}=	Get Element Attribute	sku@placeholder
-	Should Be Equal		${INFO}		SKU1, SKU2,.. (can be done later)
+	Should Be Equal		${INFO}		SKU1, SKU2,.. (optional - can be done via Add Subscription tab)
 	${INFO}=	Get Element Attribute	quantity@placeholder
-	Should Be Equal		${INFO}		value above 0 effective to all SKUs listed above (can be done later)
+	Should Be Equal		${INFO}		effective to all SKUs listed above (default is 1)
 	
-Create accounts - check page title
+Create account - verify page title
 	[Documentation] 
 	[Tags]     regression
-	Open Account Test Page		Create Account
-    Page should contain   Create account
-	${INFO}=	Get Text	xpath=//*[@id='create_form']/ol/li[2]/strong
+	${INFO}=	Get Text	xpath=//*[@id='create']/ol/li[2]/strong
 	Should Be Equal		${INFO}		Accounts
-	${INFO}=	Get Text	xpath=//*[@id='create_form']/ol/li[3]
+	${INFO}=	Get Text	xpath=//*[@id='create']/ol/li[3]
 	Should Be Equal		${INFO}		New	
 	
-Create accounts - check help info
+Create account - verify help info
 	[Documentation] 
 	[Tags]     regression
-	Open Account Test Page		Create Account
-    Page should contain   Create account
-	# 1
+	# Check help info 1
 	Page should contain		By using this form you can easily create a brand new account for Stage Candlepin.
 	Page should contain		You can test your account via the Stage Customer Portal.
-	# 2
-	Page should contain		Optionally, you can attach Subscription SKUs to the account in no step. This process can also be done any other time, when your account is already created. To do so, please use the Attach Subscription tab.
-	Page should contain		If you choose to attach subscriptions while creating an account you can specify the pool's quantity as well. Please be noted, when you don't specify the quantity yourself, a default value is set. Default value is 1.
-	# 3
-	Page should contain		TIP:You can check your already created accounts via View Accounts tab. 
-	# 4
+	
+	# Check help info 2
+	Page should contain		Optionally, you can attach subscription SKUs to the account in one step. This process can also be done any other time, when your account is already created. To do so, please use the Add Subscription tab.
+	Page should contain		If you choose to add subscriptions while creating an account you can specify the pool's quantity as well. Please be noted, when you don't specify the quantity yourself, a default value is set. Default value is 1.
+	
+	# Check help info 3
+	Page should contain		TIP:You can check your already created accounts via View Account tab. 
+	
+	# Check help info 4
 	Page should contain		By default, all created accounts are also activated. That means the Terms and Conditions that have to be accepted in order to use the account are automatically accepted. If you want to keep your account inactive, just untick the checkbox.
 	Page should contain		Accepting Terms and Conditions is only applicable for accounts that have been populated with Red Hat Subscription SKUs.
+	
+Create account - verify password length limitation
+	[Documentation]
+    [Tags]    regression
+    # <input id="password" class="form-control" type="text" value="" required="" placeholder="password" name="password" maxlength="25"/>
+    ${maxlength}=	Get Element Attribute	password@maxlength
+	Should Be Equal		${maxlength}		25
 
-Create accounts with new username and password without accepting terms
-    [Documentation]		
-    [Tags]    regression  
+Create account - verify quantity type and min value
+    [Documentation]
+    [Tags]    regression
+    # <input id="username" class="form-control" type="text" value="" required="" placeholder="login" name="username"/>
+    # <input id="quantity" class="form-control" type="number" value="" placeholder="value above 0 effective to all SKUs listed above (can be done later)" name="quantity" min="1"/>
+    ${type_value}=	Get Element Attribute	quantity@type
+	Should Be Equal		${type_value}		number
+	${min_value}=	Get Element Attribute	quantity@min
+	Should Be Equal		${min_value}		1
+	
+Create account with new username and password without accepting terms
+    [Documentation] 
+	...	Create an account without accepting terms
+    ...	Actually, we cannot have a account without accepting terms and without skus, as:
+    ...	Terms are accepted after call api /account/new, but become un-accepted after add a valid sku with api /account/attach
+    ...	But, create(/account/new) a account and activate(/account/activate) it, and then add a valid sku, terms are still accepted
+    ...	
+	[Tags]     regression	  
     ${TEST_USERNAME}  Generate Username
-	Open Account Test Page		Create Account
-    Page should contain   Create account
     Input Text		id=username    ${TEST_USERNAME}
     Input Text		id=password    ${PASSWORD}
     Click Element	id=terms
     Click Element	id=submit
-	Created without accepting terms	${TEST_USERNAME}
-	${NOT_ACCEPT_CONTENT}=	Set Variable	Accept Terms and Conditions 
-	Check Terms Status		${TEST_USERNAME}	${NOT_ACCEPT_CONTENT}
 
-Create accounts with new username and password
+	# Verify result after created without sku and without accepting terms
+	${SUCCESS_MESSAGE}=   Catenate  Creating account "${TEST_USERNAME}"
+    Wait Until Page Contains   ${SUCCESS_MESSAGE}	timeout=50 
+    ${SUCCESS_MESSAGE}=   Catenate  Creating account owners in Candlepin
+    Wait Until Page Contains   ${SUCCESS_MESSAGE}	timeout=50 
+    ${SUCCESS_MESSAGE}=   Catenate  Account "${TEST_USERNAME}" created
+    Wait Until Page Contains   ${SUCCESS_MESSAGE}	timeout=50 
+	
+	# Verify terms
+	Check Terms Status		${TEST_USERNAME}	${ACCEPT_CONTENT}	
+
+Create account with new username, password, sku and quantity without accepting terms
+    [Documentation]		
+    [Tags]    regression 
+    ${TEST_USERNAME}  Generate Username
+    Input Text		id=username    ${TEST_USERNAME}
+    Input Text		id=password    ${PASSWORD}
+    Input Text		id=sku			${SKU}
+    Input Text		id=quantity		${QUANTITY}
+    Click Element	id=terms
+    Click Element	id=submit
+
+	# Verify result after created with sku and without accepting terms	
+	${SUCCESS_MESSAGE}=   Catenate  Creating account "${TEST_USERNAME}"
+    Wait Until Page Contains   ${SUCCESS_MESSAGE}	timeout=50 
+    ${SUCCESS_MESSAGE}=   Set Variable  Adding subscriptions to "${TEST_USERNAME}"
+    Wait Until Page Contains   ${SUCCESS_MESSAGE}	timeout=50
+    ${SUCCESS_MESSAGE}=   Catenate  Creating account owners in Candlepin
+    Wait Until Page Contains   ${SUCCESS_MESSAGE}	timeout=50 
+    ${SUCCESS_MESSAGE}=   Catenate  Account "${TEST_USERNAME}" created
+    Wait Until Page Contains   ${SUCCESS_MESSAGE}	timeout=50
+    
+	# Verify terms 
+	Check Terms Status		${TEST_USERNAME}	${NOT_ACCEPT_CONTENT}
+    
+Create account with new username and password
     [Documentation]		
     [Tags]    regression  
     ${TEST_USERNAME}  Generate Username
-	Open Account Test Page		Create Account
-    Page should contain   Create account
     Input Text		id=username    ${TEST_USERNAME}
     Input Text		id=password    ${PASSWORD}
     Click Element	id=submit
-	Success Created		${TEST_USERNAME}
+    
+    # Verify result
+	Verify result after create account successfully		${TEST_USERNAME}
 
 Create account with new username, password and first_name
     [Documentation]
     [Tags]    regression
 	${TEST_USERNAME}  Generate Username
-    Open Account Test Page		Create Account
-    Page should contain   Create account
     Input Text     id=username    ${TEST_USERNAME}
     Input Text     id=password    ${PASSWORD}
     Input Text     id=first_name  ${FIRST_NAME}
     Click Element  id=submit
-    Success Created		${TEST_USERNAME}
+    
+    # Verify result
+    Verify result after create account successfully		${TEST_USERNAME}
     
 Create account with new username, password and last_name
     [Documentation]
     [Tags]    regression
 	${TEST_USERNAME}  Generate Username
-    Open Account Test Page		Create Account
-    Page should contain   Create account
     Input Text     id=username    ${TEST_USERNAME}
     Input Text     id=password    ${PASSWORD}
     Input Text     id=last_name   ${LAST_NAME}
     Click Element  id=submit
-    Success Created		${TEST_USERNAME}
     
-Create accounts with new username, password, first_name and last_name
+    # Verify result
+    Verify result after create account successfully		${TEST_USERNAME}
+    
+Create account with new username, password, first_name and last_name
     [Documentation]
     [Tags]    regression
 	${TEST_USERNAME}  Generate username
-    Open Account Test Page		Create Account
-    Page should contain   Create account
     Input Text     id=username    ${TEST_USERNAME}
     Input Text     id=password    ${PASSWORD}
     Input Text     id=first_name  ${FIRST_NAME}
     Input Text     id=last_name   ${LAST_NAME}
     Click Element  id=submit
-    Success Created		${TEST_USERNAME}
+    
+    # Verify result
+    Verify result after create account successfully		${TEST_USERNAME}
 
-Create accounts with one existing username and password
+Create account with one existing username and password
     [Documentation]
     [Tags]    regression
-    Open Account Test Page		Create Account
-    Page should contain   Create account
     Input Text     id=username    ${EXISTING_USERNAME}
     Input Text     id=password    ${PASSWORD}
     Click Element  id=submit
-    User Already Exist
+    
+    # Verify result
+    User Already Exists
 
-Create accounts with one existing username and wrong password
+Create account with one existing username and wrong password
     [Documentation]
     [Tags]    regression
-    Open Account Test Page		Create Account
-    Page should contain   Create account
     Input Text     id=username    ${EXISTING_USERNAME}
     Input Text     id=password    ${WRONG_PASSWORD}
     Click Element  id=submit
-    User Already Exist
     
-Create accounts with one username including special character and password
+    # Verify result
+    User Already Exists
+    
+Create account with one username including special character and password
+    [Documentation]
+    ...	<input id="username" class="form-control" type="text" value="" title="Login must be at least 5 characters long (up to 255) and cannot contain spaces or 
+    ...	the following special characters: (") ($) (^) (<) (>) (|) (+) (%) (/) (;) (:) (,) (\) (*) (=) (~)" required="" placeholder="login" 
+    ...	pattern="^[^\s"$\^<>|+%\/;:,\\*=~]{5,255}$" name="username" minlenght="5" maxlength="255"/>
+    [Tags]    regression
+    #@{SPECIAL_CHARACTER}=    Create List     <	>	(	)	!	*	&	|	.	@	$	^	\	~	`	'	"	{	}	[	]
+    @{SPECIAL_CHARACTER}=	Create List		(	)	!	&	.	@	`	'	{	}	[	]
+    :For    ${i}    in      @{SPECIAL_CHARACTER}
+    \       Log     ${i}
+    \		${TEST_USERNAME}=     Generate username
+    \       ${TEST_USERNAME}=  Catenate     ${TEST_USERNAME}${i}
+    \       Input Text     id=username    ${TEST_USERNAME}
+    \		Input Text     id=password    ${PASSWORD}
+    \       Input Text     id=first_name  ${FIRST_NAME}
+    \		Input Text     id=last_name   ${LAST_NAME}
+    \		Click Element  id=submit
+    \		# Verify result
+    \       Verify result after create account successfully		${TEST_USERNAME}
+    
+Create account with one new username and password including special character
     [Documentation]
     [Tags]    regression
-    Open Account Test Page		Create Account
-    Page should contain   Create account
-    ${TEST_USERNAME}=	Generate username
-    ${TEST_USERNAME}=	Catenate	${TEST_USERNAME} \\
-    Input Text     id=username    ${TEST_USERNAME}
-    Input Text     id=password    ${PASSWORD}
-    Input Text     id=first_name  ${FIRST_NAME}
-    Input Text     id=last_name   ${LAST_NAME}
-    Click Element  id=submit
-    ${SUCCESS_MESSAGE}=   Set Variable	Application encountered an network issue, please try again later
-    Wait Until Page Contains   ${SUCCESS_MESSAGE}
-    Test File a bug Link
-    
-Create accounts with one new username and password including special character
-    [Documentation]
-    [Tags]    regression
-	${TEST_USERNAME}  Generate Username
-    Open Account Test Page		Create Account
-    Page should contain   Create account
-    Input Text     id=username    ${TEST_USERNAME}
-    Input Text     id=password    ${SPECIAL_PASSWORD}
-    Input Text     id=first_name  ${FIRST_NAME}
-    Input Text     id=last_name   ${LAST_NAME}
-    Click Element  id=submit
-    Success Created		${TEST_USERNAME}
+    @{SPECIAL_CHARACTER}=    Create List     <	>	(	)	!	*	&	|	.	@	$	^	\	~	`	'	"	{	}	[	]	/	\\	\#	%	;	:	,	?
+    :For    ${i}    in      @{SPECIAL_CHARACTER}
+    \       Log     ${i}
+	\		${TEST_USERNAME}=  Generate Username
+	\		${SPECIAL_PASSWORD}=	Catenate     ${PASSWORD}${i}
+    \		Input Text     id=username    ${TEST_USERNAME}
+    \		Input Text     id=password    ${SPECIAL_PASSWORD}
+    \		Input Text     id=first_name  ${FIRST_NAME}
+    \		Input Text     id=last_name   ${LAST_NAME}
+    \		Click Element  id=submit
+    \		# Verify result
+    \		Verify result after create account successfully		${TEST_USERNAME}
 
-Create accounts with new username, password, sku and quantity
+Create account with new username, password, valid sku and quantity
     [Documentation]
     [Tags]    regression
 	${TEST_USERNAME}  Generate Username
-    Open Account Test Page		Create Account
-    Page should contain   Create account
     Input Text		id=username     ${TEST_USERNAME}
     Input Text		id=password     ${PASSWORD}
     Input Text		id=first_name   ${FIRST_NAME}
@@ -209,14 +259,14 @@ Create accounts with new username, password, sku and quantity
     Input Text		id=sku			${SKU}
     Input Text		id=quantity		${QUANTITY}
     Click Element  id=submit
-    Success Created and Attach	${TEST_USERNAME}	${SKU}
     
-Create accounts with new username, password, skus and quantity
+    # Verify result
+	Verify result after create create and add sku successfully	${TEST_USERNAME}
+    
+Create account with new username, password, valid skus and quantity
     [Documentation]
     [Tags]    regression
 	${TEST_USERNAME}  Generate Username
-    Open Account Test Page		Create Account
-    Page should contain   Create account
     Input Text		id=username     ${TEST_USERNAME}
     Input Text		id=password     ${PASSWORD}
     Input Text		id=first_name   ${FIRST_NAME}
@@ -224,136 +274,313 @@ Create accounts with new username, password, skus and quantity
     Input Text		id=sku			${SKUS}
     Input Text		id=quantity		${QUANTITY}
     Click Element  id=submit
-    Success Created and Attach		${TEST_USERNAME}	${SKUS}
     
-Create accounts with new username, password, sku and null quantity
-    [Documentation]
-    [Tags]    regression
-	${TEST_USERNAME}  Generate Username
-    Open Account Test Page		Create Account
-    Page should contain   Create account
-    Input Text		id=username     ${TEST_USERNAME}
-    Input Text		id=password     ${PASSWORD}
-    Input Text		id=first_name   ${FIRST_NAME}
-    Input Text		id=last_name	${LAST_NAME}
-    Input Text		id=sku			${SKU}
-    Click Element  id=submit
-    #Success Created and Attach	${TEST_USERNAME}
+	# Verify result
+	Verify result after create create and add sku successfully	${TEST_USERNAME}
 
-Create accounts with new username, password, sku and negative quantity
+Create account with new username, password, invalid sku and quantity
     [Documentation]
     [Tags]    regression
 	${TEST_USERNAME}  Generate Username
-    Open Account Test Page		Create Account
-    Page should contain   Create account
     Input Text		id=username     ${TEST_USERNAME}
     Input Text		id=password     ${PASSWORD}
     Input Text		id=first_name   ${FIRST_NAME}
     Input Text		id=last_name	${LAST_NAME}
-    Input Text		id=sku			${SKU}
-    Input Text		id=quantity		${NEGTIVE_QUANTITY}
-    Click Element  id=submit
-    #Success Created and Attach	${TEST_USERNAME}
-
-Create accounts with new username, password, sku and zero quantity
-    [Documentation]
-    [Tags]    regression
-	${TEST_USERNAME}  Generate Username
-    Open Account Test Page		Create Account
-    Page should contain   Create account
-    Input Text		id=username     ${TEST_USERNAME}
-    Input Text		id=password     ${PASSWORD}
-    Input Text		id=first_name   ${FIRST_NAME}
-    Input Text		id=last_name	${LAST_NAME}
-    Input Text		id=sku			${SKU}
-    Input Text		id=quantity		0
-    Click Element  id=submit
-    #Success Created and Attach	${TEST_USERNAME}
-
-Create accounts with new username, password, null sku and quantity
-    [Documentation]
-    [Tags]    regression
-	${TEST_USERNAME}  Generate Username
-    Open Account Test Page		Create Account
-    Page should contain   Create account
-    Input Text		id=username     ${TEST_USERNAME}
-    Input Text		id=password     ${PASSWORD}
-    Input Text		id=first_name   ${FIRST_NAME}
-    Input Text		id=last_name	${LAST_NAME}
+    Input Text		id=sku			${INVALID_SKU}
     Input Text		id=quantity		${QUANTITY}
     Click Element  id=submit
-    #Success Created and Attach	${TEST_USERNAME}
     
-Create accounts with new username, password, wrong sku and quantity
+    # Verify result
+    ${SUCCESS_MESSAGE}=   Catenate  Creating account "${TEST_USERNAME}"
+    Wait Until Page Contains   ${SUCCESS_MESSAGE}	timeout=20
+    ${SUCCESS_MESSAGE}=   Catenate  Accepting Ts&Cs for "${TEST_USERNAME}"
+    Wait Until Page Contains   ${SUCCESS_MESSAGE}	timeout=20 
+    ${INVALID_SKU_LIST}=	Split String	${INVALID_SKU}	,
+    #${SUCCESS_MESSAGE}=   Set Variable  Unable to add SKUs (not found in the DB): ${INVALID_SKU_LIST}
+    ${SUCCESS_MESSAGE}=   Catenate  Bad request: Value of 'sku (${INVALID_SKU_LIST})' parameter is not valid input
+    Wait Until Page Contains   ${SUCCESS_MESSAGE}	timeout=50
+    ${SUCCESS_MESSAGE}=   Set Variable  Creating account owners in Candlepin
+    Wait Until Page Contains   ${SUCCESS_MESSAGE}	timeout=50
+    ${SUCCESS_MESSAGE}=   Catenate  Account "${TEST_USERNAME}" created
+    Wait Until Page Contains   ${SUCCESS_MESSAGE}	timeout=50
+ 
+Create account with new username, password, invalid skus and quantity
     [Documentation]
     [Tags]    regression
 	${TEST_USERNAME}  Generate Username
-    Open Account Test Page		Create Account
-    Page should contain   Create account
-	Input Text		id=username     ${TEST_USERNAME}
+    Input Text		id=username     ${TEST_USERNAME}
     Input Text		id=password     ${PASSWORD}
     Input Text		id=first_name   ${FIRST_NAME}
     Input Text		id=last_name	${LAST_NAME}
-    Input Text		id=sku			${WRONG_SKU}
+    Input Text		id=sku			${INVALID_SKUS}
     Input Text		id=quantity		${QUANTITY}
     Click Element  id=submit
-    #Success Created and Attach	${TEST_USERNAME}
-
-Create accounts with new username, password, wrong skus and quantity
+    
+    # Verify result
+    ${SUCCESS_MESSAGE}=   Catenate  Creating account "${TEST_USERNAME}"
+    Wait Until Page Contains   ${SUCCESS_MESSAGE}	timeout=20
+    ${SUCCESS_MESSAGE}=   Catenate  Accepting Ts&Cs for "${TEST_USERNAME}"
+    Wait Until Page Contains   ${SUCCESS_MESSAGE}	timeout=20 
+    ${INVALID_SKU_LIST}=	Split String	${INVALID_SKUS}	,
+    #${SUCCESS_MESSAGE}=   Set Variable  Unable to add SKUs (not found in the DB): ${INVALID_SKU_LIST}
+    ${SUCCESS_MESSAGE}=   Catenate  Bad request: Value of 'sku (${INVALID_SKU_LIST})' parameter is not valid input
+    Wait Until Page Contains   ${SUCCESS_MESSAGE}	timeout=50
+    ${SUCCESS_MESSAGE}=   Set Variable  Creating account owners in Candlepin
+    Wait Until Page Contains   ${SUCCESS_MESSAGE}	timeout=50
+    ${SUCCESS_MESSAGE}=   Catenate  Account "${TEST_USERNAME}" created
+    Wait Until Page Contains   ${SUCCESS_MESSAGE}	timeout=50
+        
+Create account with new username, password, valid and invalid skus and quantity
     [Documentation]
     [Tags]    regression
-	${TEST_USERNAME}  Generate Username
-    Open Account Test Page		Create Account
-    Page should contain   Create account
-	Input Text		id=username     ${TEST_USERNAME}
+	${TEST_USERNAME}=  Generate Username
+    ${VALID_INVALID_SKUS}=	Catenate	${SKU},${INVALID_SKU}
+    Input Text		id=username     ${TEST_USERNAME}
     Input Text		id=password     ${PASSWORD}
     Input Text		id=first_name   ${FIRST_NAME}
     Input Text		id=last_name	${LAST_NAME}
-    Input Text		id=sku			${WRONG_SKUS}
+    Input Text		id=sku			${VALID_INVALID_SKUS}
     Input Text		id=quantity		${QUANTITY}
     Click Element  id=submit
-    #Success Created and Attach	${TEST_USERNAME}
-
-Create accounts with new username, password, wrong sku and negative quantity
+    
+    # Verify result
+ 	${SUCCESS_MESSAGE}=   Catenate  Creating account "${TEST_USERNAME}"
+    Wait Until Page Contains   ${SUCCESS_MESSAGE}	timeout=20
+    ${SUCCESS_MESSAGE}=   Catenate  Accepting Ts&Cs for "${TEST_USERNAME}"
+    Wait Until Page Contains   ${SUCCESS_MESSAGE}	timeout=20
+    ${SUCCESS_MESSAGE}=   Set Variable  Adding subscriptions to "${TEST_USERNAME}"
+    Wait Until Page Contains   ${SUCCESS_MESSAGE}	timeout=50 
+    ${INVALID_SKU_LIST}=	Split String	${INVALID_SKU}	,
+    #${SUCCESS_MESSAGE}=   Set Variable  Unable to add SKUs (not found in the DB): ${INVALID_SKU_LIST}
+    ${SUCCESS_MESSAGE}=   Catenate  Bad request: Value of 'sku (${INVALID_SKU_LIST})' parameter is not valid input
+    Wait Until Page Contains   ${SUCCESS_MESSAGE}	timeout=50
+    ${SUCCESS_MESSAGE}=   Set Variable  Creating account owners in Candlepin
+    Wait Until Page Contains   ${SUCCESS_MESSAGE}	timeout=50
+    ${SUCCESS_MESSAGE}=   Catenate  Account "${TEST_USERNAME}" created
+    Wait Until Page Contains   ${SUCCESS_MESSAGE}	timeout=50
+    
+Create account with new username, password, sku and null quantity
     [Documentation]
     [Tags]    regression
 	${TEST_USERNAME}  Generate Username
-    Open Account Test Page		Create Account
-    Page should contain   Create account
-	Input Text		id=username     ${TEST_USERNAME}
+    Input Text		id=username     ${TEST_USERNAME}
     Input Text		id=password     ${PASSWORD}
     Input Text		id=first_name   ${FIRST_NAME}
     Input Text		id=last_name	${LAST_NAME}
-    Input Text		id=sku			${WRONG_SKU}
-    Input Text		id=quantity		${NEGTIVE_QUANTITY}
+    Input Text		id=sku			${SKU}
     Click Element  id=submit
-    ${SUCCESS_MESSAGE}=   Catenate  Account "${TEST_USERNAME}" successfully created.
-    #Success Created and Attach	${TEST_USERNAME}
+    
+    # Verify result
+    Verify result after create create and add sku successfully	${TEST_USERNAME}	    
+
+Create account with new username, password, null sku and quantity
+    [Documentation]
+    [Tags]    regression
+	${TEST_USERNAME}  Generate Username
+    Input Text		id=username     ${TEST_USERNAME}
+    Input Text		id=password     ${PASSWORD}
+    Input Text		id=first_name   ${FIRST_NAME}
+    Input Text		id=last_name	${LAST_NAME}
+    Input Text		id=quantity		${QUANTITY}
+    Click Element  id=submit
+    Verify result after create account successfully	${TEST_USERNAME}
+	
 
 *** Keywords ***
-
-User Already Exist
-    ${FAIL_MESSAGE}=	Set Variable	User already exist
+User Already Exists
+    ${FAIL_MESSAGE}=	Set Variable	User already exists
     Wait Until Page Contains   ${FAIL_MESSAGE} 
     Test File a bug Link
     
-An example how to catch a piece of a page that is displayed just for a moment
-       [Documentation]   There is a piece of html generated by javascript on a "create account" page. It is a message dnd it disappears in a moment. You can use keyword "Pause Execution" and "Log Source". Just click on a button "Pause" when the piece appears. And "Log Source" will show you the piece.
-       ${UNIQUE_ID}  Generate Random String
-       ${TEST_USERNAME}  Catenate   test-user ${UNIQUE_ID}
-       Go to Front Page
-       Wait Until Page Contains Element   link=Create Account
-       Click Link       Create Account
-       Page should contain   Create account
-       Input Text     id=username    ${TEST_USERNAME}
-       Input Text     id=password    redhat
-       Input Text     id=first_name  Jan
-       Input Text     id=last_name   Stavel
-       Click Element  id=submit
-       Pause Execution
-       #Log Source     loglevel=WARN
-       Log Source		loglevel=DEBUG
-    
-others
-    #${SUCCESS_MESSAGE}=   Catenate  Attached subscriptions for '${TEST_USERNAME}'
-    ${SUCCESS_MESSAGE}=   Catenate  Attached subscriptions for '${TEST_USERNAME}''
+Suite Setup Steps
+	Log	Suite Begin...
+	Open Browser  ${FRONT_PAGE}   ${BROWSER}
+	Maximize Browser Window
+
+Test Setup Steps
+	Log	Suite Begin...   
+    Go to Front Page
+    Wait Until Page Contains Element   link=Create Account
+    Click Link       Create Account
+    Page should contain Element   xpath=${Create_Create_Link}
+    Capture Page Screenshot
+
+Test Teardown Steps
+	Capture Page Screenshot
+	Log	Testing End...
+
+Suite TearDown Steps
+	Close All Browsers
+	Log	Suite End...	
+	
+	
+###
+###	Keep these cases here for now
+###
+Create account with one username including ; and password
+    [Documentation]
+    [Tags]    regression
+	# Unable to verify if account creation was successful
+    # Unable to Create account
+    ${TEST_USERNAME}=     Generate username
+    ${SPECIAL_CHARACTER}=    Set Variable	;
+    @{NUMBER_LIST}=	Evaluate	range(10)
+    :For    ${i}    in      @{NUMBER_LIST}
+    \       Log     ${i}
+    \		#Select Window	url=${FRONT_PAGE}
+    \       ${TEST_USERNAME}=  Catenate     ${TEST_USERNAME}${SPECIAL_CHARACTER}
+    \       Input Text     id=username    ${TEST_USERNAME}
+    \		Input Text     id=password    ${PASSWORD}
+    \       Input Text     id=first_name  ${FIRST_NAME}
+    \		Input Text     id=last_name   ${LAST_NAME}
+    \		Click Element  id=submit
+    \		${SUCCESS_MESSAGE}=   Catenate  Creating account "${TEST_USERNAME}"
+    \		Wait Until Page Contains   ${SUCCESS_MESSAGE}	timeout=50
+    \		Wait Until Page Contains   Unable to verify if account creation was successful
+    \		Test File a bug Link
+
+Create account with one username including : and password
+    [Documentation]
+    [Tags]    regression
+	# Invalid username or password 
+    ${TEST_USERNAME}=     Generate username
+    ${SPECIAL_CHARACTER}=    Set Variable	:
+    @{NUMBER_LIST}=	Evaluate	range(10)
+    :For    ${i}    in      @{NUMBER_LIST}
+    \       Log     ${i}
+    \		#Select Window	url=${FRONT_PAGE}
+    \       ${TEST_USERNAME}=  Catenate     ${TEST_USERNAME}${SPECIAL_CHARACTER}
+    \       Input Text     id=username    ${TEST_USERNAME}
+    \		Input Text     id=password    ${PASSWORD}
+    \       Input Text     id=first_name  ${FIRST_NAME}
+    \		Input Text     id=last_name   ${LAST_NAME}
+    \		Click Element  id=submit
+    \		${SUCCESS_MESSAGE}=   Catenate  Creating account "${TEST_USERNAME}"
+    \		Wait Until Page Contains   ${SUCCESS_MESSAGE}	timeout=50
+    \		Wait Until Page Contains   Invalid username or password
+    \		Test File a bug Link
+
+Create account with one username including ? and password
+    [Documentation]
+    [Tags]    regression
+	# Unable to verify if account creation was successful
+    ${TEST_USERNAME}=     Generate username
+    ${SPECIAL_CHARACTER}=    Set Variable	?
+    @{NUMBER_LIST}=	Evaluate	range(10)
+    :For    ${i}    in      @{NUMBER_LIST}
+    \       Log     ${i}
+    \		#Select Window	url=${FRONT_PAGE}
+    \       ${TEST_USERNAME}=  Catenate     ${TEST_USERNAME}${SPECIAL_CHARACTER}
+    \       Input Text     id=username    ${TEST_USERNAME}
+    \		Input Text     id=password    ${PASSWORD}
+    \       Input Text     id=first_name  ${FIRST_NAME}
+    \		Input Text     id=last_name   ${LAST_NAME}
+    \		Click Element  id=submit
+    \		${SUCCESS_MESSAGE}=   Catenate  Creating account "${TEST_USERNAME}"
+    \		Wait Until Page Contains   ${SUCCESS_MESSAGE}	timeout=50
+    \		Wait Until Page Contains   Unable to verify if account creation was successful
+    \		Test File a bug Link
+
+Create account with one username including , and password
+    [Documentation]
+    [Tags]    regression
+	# Unable to verify if account creation was successful
+    ${TEST_USERNAME}=     Generate username
+    ${SPECIAL_CHARACTER}=    Set Variable	,
+    @{NUMBER_LIST}=	Evaluate	range(10)
+    :For    ${i}    in      @{NUMBER_LIST}
+    \       Log     ${i}
+    \		#Select Window	url=${FRONT_PAGE}
+    \       ${TEST_USERNAME}=  Catenate     ${TEST_USERNAME}${SPECIAL_CHARACTER}
+    \       Input Text     id=username    ${TEST_USERNAME}
+    \		Input Text     id=password    ${PASSWORD}
+    \       Input Text     id=first_name  ${FIRST_NAME}
+    \		Input Text     id=last_name   ${LAST_NAME}
+    \		Click Element  id=submit
+    \		${SUCCESS_MESSAGE}=   Catenate  Creating account "${TEST_USERNAME}"
+    \		Wait Until Page Contains   ${SUCCESS_MESSAGE}	timeout=50
+    \		Wait Until Page Contains   Unable to verify if account creation was successful
+    \		Test File a bug Link
+
+Create account with one username including # and password
+    [Documentation]
+    [Tags]    regression
+	# Unable to verify if account creation was successful 
+    ${TEST_USERNAME}=     Generate username
+    #${SPECIAL_CHARACTER}=    Set Variable	\#
+    @{NUMBER_LIST}=	Evaluate	range(10)
+    :For    ${i}    in      @{NUMBER_LIST}
+    \       Log     ${i}
+    \		#Select Window	url=${FRONT_PAGE}
+    \       ${TEST_USERNAME}=  Catenate     ${TEST_USERNAME}#
+    \       Input Text     id=username    ${TEST_USERNAME}
+    \		Input Text     id=password    ${PASSWORD}
+    \       Input Text     id=first_name  ${FIRST_NAME}
+    \		Input Text     id=last_name   ${LAST_NAME}
+    \		Click Element  id=submit
+    \		${SUCCESS_MESSAGE}=   Catenate  Creating account "${TEST_USERNAME}"
+    \		Wait Until Page Contains   ${SUCCESS_MESSAGE}	timeout=50
+    \		Wait Until Page Contains   Unable to verify if account creation was successful
+    \		Test File a bug Link
+			
+Create account with one username including / and password 
+    [Documentation]
+    [Tags]    regression
+    # Unable to verify if account creation was successful
+    # Unable to Create account
+    ${TEST_USERNAME}=     Generate username
+    ${SPECIAL_CHARACTER}=    Set Variable	/
+    @{NUMBER_LIST}=	Evaluate	range(10)
+    :For    ${i}    in      @{NUMBER_LIST}
+    \       Log     ${i}
+    \       ${TEST_USERNAME}=  Catenate     ${TEST_USERNAME}${SPECIAL_CHARACTER}
+    \       Input Text     id=username    ${TEST_USERNAME}
+    \		Input Text     id=password    ${PASSWORD}
+    \       Input Text     id=first_name  ${FIRST_NAME}
+    \		Input Text     id=last_name   ${LAST_NAME}
+    \		Click Element  id=submit
+    \		${SUCCESS_MESSAGE}=   Catenate  Creating account "${TEST_USERNAME}"
+    \		Wait Until Page Contains   ${SUCCESS_MESSAGE}	timeout=50
+    \		Wait Until Page Contains   Unable to verify if account creation was successful
+    \		Test File a bug Link
+
+Create account with one username including % and password 
+    [Documentation]
+    [Tags]    regression
+	# Application encountered an network issue, please try again later
+    # Unable to Create account
+    ${TEST_USERNAME}=     Generate username
+    ${SPECIAL_CHARACTER}=    Set Variable	%
+    @{NUMBER_LIST}=	Evaluate	range(10)
+    :For    ${i}    in      @{NUMBER_LIST}
+    \       Log     ${i}
+    \       ${TEST_USERNAME}=  Catenate     ${TEST_USERNAME}${SPECIAL_CHARACTER}
+    \       Input Text     id=username    ${TEST_USERNAME}
+    \		Input Text     id=password    ${PASSWORD}
+    \       Input Text     id=first_name  ${FIRST_NAME}
+    \		Input Text     id=last_name   ${LAST_NAME}
+    \		Click Element  id=submit
+    \		${SUCCESS_MESSAGE}=   Catenate  Creating account "${TEST_USERNAME}"
+    \		Wait Until Page Contains   ${SUCCESS_MESSAGE}	timeout=50
+    \		Wait Until Page Contains   Application encountered an network issue, please try again later
+    \		Test File a bug Link
+
+Create account with one username including \ and password 
+    [Documentation]
+    [Tags]    regression
+	# Application encountered an network issue, please try again later
+    # Unable to Create account
+    ${TEST_USERNAME}=     Generate username 
+    @{SPECIAL_CHARACTER}=    Create List	\\	\\\	\\\\	\\\\\	\\\\\\	\\\\\\\	\\\\\\\\	\\\\\\\\\	\\\\\\\\\\
+    :For    ${i}    in      @{SPECIAL_CHARACTER}
+    \       Log     ${i}
+    \       ${TEST_USERNAME}=  Catenate     ${TEST_USERNAME}${i}
+    \       Input Text     id=username    ${TEST_USERNAME}
+    \		Input Text     id=password    ${PASSWORD}
+    \       Input Text     id=first_name  ${FIRST_NAME}
+    \		Input Text     id=last_name   ${LAST_NAME}
+    \		Click Element  id=submit
+    \		${SUCCESS_MESSAGE}=   Catenate  Creating account "${TEST_USERNAME}"
+    \		Wait Until Page Contains   ${SUCCESS_MESSAGE}	timeout=50
+    \		Wait Until Page Contains   Application encountered an network issue, please try again later
+    \		Test File a bug Link

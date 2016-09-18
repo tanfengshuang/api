@@ -1,107 +1,86 @@
 *** Settings ***
 Documentation     Attach subscriptions
 Resource          ../resources/global.robot
-Suite Setup       Open Browser  ${FRONT_PAGE}   ${BROWSER}
-Suite Teardown    Close All Browsers
+Suite Setup	Suite Setup Steps
+Test Setup	Test Setup Steps
+Test Teardown	Test Teardown Steps
+Suite Teardown	Suite Teardown Steps
 
 *** Variables ***
-
-
-*** Variables ***
-${correct_username}    "ftan_test"
-${wrong_username}    "not"
-${correct_password}    "redhat"
-${wrong_password}    "redhat111"
 
 *** Test Cases ***
-Refresh accounts - check url location
+Refresh Subscriptions - verify url location
     [Documentation] 
 	[Tags]     regression
-	Open Account Test Page		Refresh Subscriptions
-    Page should contain   Refresh account subscriptions
 	${location}=	Get location
 	
-Refresh accounts - check required field
+Refresh Subscriptions - verify required field
     [Documentation] 
 	[Tags]     regression
-	Open Account Test Page		Refresh Subscriptions
-    Page should contain   Refresh account subscriptions
-	${REQUIRED}=	Get Element Attribute	//form[@id='pool_refresh']/div/div/input[@id='username']@required
+	${REQUIRED}=	Get Element Attribute	${Refresh_Username_Link}@required
 	Should Be Equal		${REQUIRED}		true
-	${REQUIRED}=	Get Element Attribute	//form[@id='pool_refresh']/div/div/input[@id='password']@required
+	${REQUIRED}=	Get Element Attribute	${Refresh_Password_Link}@required
 	Should Be Equal		${REQUIRED}		true
 
-Refresh accounts - check input default info
+Refresh Subscriptions - verify input default info
 	[Documentation] 
 	[Tags]     regression
-	Open Account Test Page		Refresh Subscriptions
-    Page should contain   Refresh account subscriptions
-	${INFO}=	Get Element Attribute	//form[@id='pool_refresh']/div/div/input[@id='username']@placeholder
+	${INFO}=	Get Element Attribute	${Refresh_Username_Link}@placeholder
 	Should Be Equal		${INFO}		login
-	${INFO}=	Get Element Attribute	//form[@id='pool_refresh']/div/div/input[@id='password']@placeholder
+	${INFO}=	Get Element Attribute	${Refresh_Password_Link}@placeholder
 	Should Be Equal		${INFO}		password
 
-Refresh accounts - check page title
+Refresh Subscriptions - verify page title
 	[Documentation] 
 	[Tags]     regression
-	Open Account Test Page		Refresh Subscriptions
-    Page should contain   Refresh account subscriptions
 	${INFO}=	Get Text	xpath=//*[@id='refresh']/ol/li[2]/strong
 	Should Be Equal		${INFO}		Subscription Pools
 	${INFO}=	Get Text	xpath=//*[@id='refresh']/ol/li[3]
 	Should Be Equal		${INFO}		Refresh
 
-Refresh accounts - check help info
+Refresh Subscriptions - verify help info
 	[Documentation] 
 	[Tags]     regression
-	Open Account Test Page		Refresh Subscriptions
-    Page should contain   Refresh account subscriptions
-    Page should contain		You can refresh the Subscriptions of your account on this tab.You can populate your account on this tab by adding pools of subscriptions. These pools will appear in the list of all available subscriptions to systems that have registered to this account.
+    # Check help info
+    Page should contain		You can refresh the Subscriptions of your account here. This is necessary in case some discrepancy between candlepin pool data and customer's current subscription data occures. For further info, see this Mojo page.
+    # Check Mojo page link
+    # <a href="https://mojo.redhat.com/docs/DOC-953386">Mojo page</a>
+    ${LINK}=	Get Element Attribute	//*[@id='refresh']/div[2]/div/div[2]/div/p/a@href
+    Should Be Equal		${LINK}		${MOJO_PAGE_URL}
 
-Refresh accounts having skus
+Refresh Subscriptions having skus with accepting terms
     [Tags]    regression
-    Open Account Test Page		Refresh Subscriptions
-    Page should contain   Refresh account subscriptions
-    Input Text     xpath=//form[@id='pool_refresh']/div/div/input[@id='username']    ${EXISTING_USERNAME}
-    Input Text     xpath=//form[@id='pool_refresh']/div/div/input[@id='password']    ${PASSWORD}
-    Click Element  xpath=//form[@id='pool_refresh']/div/div/input[@id='submit']
-	Success Refreshed		${EXISTING_USERNAME}
-    #Pause Execution
-    #Log Source     loglevel=WARN
+    Input Text     xpath=${Refresh_Username_Link}    ${EXISTING_USERNAME}
+    Input Text     xpath=${Refresh_Password_Link}    ${PASSWORD}
+    Click Element  xpath=${Refresh_Refresh_Link}
+    
+    # Verify result	
+	${SUCCESS_MESSAGE}=   Catenate  Refreshing subscriptions for "${EXISTING_USERNAME}"
+    Wait Until Page Contains   ${SUCCESS_MESSAGE}		timeout=500
+    ${SUCCESS_MESSAGE}=   Set Variable  	All attached pools were refreshed successfully
+    Wait Until Page Contains   ${SUCCESS_MESSAGE}	    timeout=500
 
-Refresh accounts without sku
+Refresh Subscriptions with existing username and wrong password
     [Tags]    regression
-    Log		Waiting
-
-Refresh accounts with accepting terms
-    [Tags]    regression
-    Log		Waiting
-
-Refresh accounts without accepting terms
-    [Tags]    regression
-    Log		Waiting
-
-Refresh accounts with existing username and wrong password
-    [Tags]    regression
-    Open Account Test Page		Refresh Subscriptions
-    Page should contain   Refresh account subscriptions
-    Input Text     xpath=//form[@id='pool_refresh']/div/div/input[@id='username']    ${EXISTING_USERNAME}
-    Input Text     xpath=//form[@id='pool_refresh']/div/div/input[@id='password']    ${WRONG_PASSWORD}
-    Click Element  xpath=//form[@id='pool_refresh']/div/div/input[@id='submit']
+    Input Text     xpath=${Refresh_Username_Link}    ${EXISTING_USERNAME}
+    Input Text     xpath=${Refresh_Password_Link}    ${WRONG_PASSWORD}
+    Click Element  xpath=${Refresh_Refresh_Link}
+    
+    # Verify result
     ${SUCCESS_MESSAGE}=   Catenate  Refreshing subscriptions for "${EXISTING_USERNAME}"
     Wait Until Page Contains   ${SUCCESS_MESSAGE}
 	${SUCCESS_MESSAGE}=   Set Variable  	Invalid username or password
     Wait Until Page Contains   ${SUCCESS_MESSAGE}
     Test File a bug Link
 
-Refresh accounts with new username and password
+Refresh Subscriptions with new username and password
     [Tags]    regression
-    Open Account Test Page		Refresh Subscriptions
-    Page should contain   Refresh account subscriptions
     ${TEST_USERNAME}=	Generate username
-    Input Text     xpath=//form[@id='pool_refresh']/div/div/input[@id='username']    ${TEST_USERNAME}
-    Input Text     xpath=//form[@id='pool_refresh']/div/div/input[@id='password']    ${PASSWORD}
-    Click Element  xpath=//form[@id='pool_refresh']/div/div/input[@id='submit']
+    Input Text     xpath=${Refresh_Username_Link}    ${TEST_USERNAME}
+    Input Text     xpath=${Refresh_Password_Link}    ${PASSWORD}
+    Click Element  xpath=${Refresh_Refresh_Link}
+    
+    # Verify result
     ${SUCCESS_MESSAGE}=   Catenate  Refreshing subscriptions for "${TEST_USERNAME}"
     Wait Until Page Contains   ${SUCCESS_MESSAGE}
 	${SUCCESS_MESSAGE}=   Set Variable  	Invalid username or password
@@ -109,3 +88,23 @@ Refresh accounts with new username and password
     Test File a bug Link
 
 *** Keywords ***
+Suite Setup Steps
+	Log	Suite Begin...
+	Open Browser  ${FRONT_PAGE}   ${BROWSER}
+	Maximize Browser Window
+
+Test Setup Steps
+	Log	Suite Begin...   
+    Go to Front Page
+    Wait Until Page Contains Element   link=Refresh Subscriptions
+    Click Link       Refresh Subscriptions
+    Page should contain Element	${Refresh_Refresh_Link}
+    Capture Page Screenshot
+
+Test Teardown Steps
+	Capture Page Screenshot
+	Log	Testing End...
+
+Suite TearDown Steps
+	Close All Browsers
+	Log	Suite End...	

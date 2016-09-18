@@ -10,23 +10,23 @@ Suite Teardown    Close All Browsers
 
 
 *** Test Cases ***
-Export accounts - check url location
+Export accounts - verify url location
     [Documentation]
     [Tags]    regression
   
-Export accounts - check required field
+Export accounts - verify required field
     [Documentation]
     [Tags]    regression
   
-Export accounts - check input default info
+Export accounts - verify input default info
     [Documentation]
     [Tags]    regression
   
-Export accounts - check page title
+Export accounts - verify page title
     [Documentation]
     [Tags]    regression
   
-Export accounts - check help info
+Export accounts - verify help info
     [Documentation]
     [Tags]    regression
 

@@ -84,6 +84,7 @@ class Account_Utils():
     
     def verify_activate(self, username, password="redhat"):
         try:
+            logging.info("Trying to check terms for account {0}".format(username))
             con = connection.UEPConnection(self.stage_candlepin_server, username=username, password=password)
             con.getOwnerList(con.username)
             return unicode(0)
@@ -91,6 +92,7 @@ class Account_Utils():
             if "You must first accept Red Hat's Terms and conditions" in str(e):
                 logging.info("{0}:{1} - You must first accept Red Hat's Terms and conditions.".format(username, password))
             else:
+                logging.error("shuang...........")
                 logging.error(str(e))
             return unicode(1)
     

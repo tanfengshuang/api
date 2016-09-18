@@ -14,7 +14,7 @@ View account without accepting terms
 	${VIEW_INFO}=  Create Dictionary     username=${TEST_USERNAME}    password=${PASSWORD}
     ${STATUS}    ${MSG}=    GET     ${GET_URL}    ${VIEW_INFO}
     Should Be Equal     ${STATUS}    400
-    Should Be Equal      ${MSG}      should return some error info here
+    Should Be Equal      ${MSG}      User is not active, can't retrieve data from Candlepin
 
 View account having sku with existing username and password
     [Documentation]
@@ -79,7 +79,8 @@ View account with existing username and null password
     [Tags]    regression
     ${VIEW_INFO}=  Create Dictionary     username=${EXISTING_USERNAME}    password=
     ${STATUS}    ${MSG}=    GET     ${GET_URL}    ${VIEW_INFO}
-    ${SUCCESS_MSG}=		Catenate	Unable to verify credentials for account '${EXISTING_USERNAME}'
+    #${SUCCESS_MSG}=		Catenate	Unable to verify credentials for account '${EXISTING_USERNAME}'
+    ${SUCCESS_MSG}=		Catenate	Bad request: Value of 'password' parameter is not valid input, reason: Password must be in range of 1-25 characters
     Should Be Equal     ${STATUS}    400
     Should Be Equal      ${MSG}	     ${SUCCESS_MSG}
 
@@ -108,11 +109,11 @@ View account with existing username and password including special sku
     ${STATUS}    ${MSG}=    GET     ${GET_URL}    ${VIEW_INFO}
     Should Be Equal     ${STATUS}    200
     
-    ${MULTIPLIER_QUANTITY}=	Evaluate	${QUANTITY}*4
+    #${MULTIPLIER_QUANTITY}=	Evaluate	${QUANTITY}*4
     @{SPECIAL_SKU_LIST}=	Split String	${SPECIAL_SKU}	,
     @{SKU_QUANTITY_LIST}=	Create List
     :For	${i}	IN	@{SPECIAL_SKU_LIST}
-    \	&{SPECIAL_SKU_DICT}= 	Create Dictionary	sku=${i}	quantity=${MULTIPLIER_QUANTITY}
+    \	&{SPECIAL_SKU_DICT}= 	Create Dictionary	sku=${i}	quantity=${QUANTITY}
    	\	Append To List	${SKU_QUANTITY_LIST}	${SPECIAL_SKU_DICT}
 	Log List	list_=@{SKU_QUANTITY_LIST}	
 	
@@ -137,43 +138,12 @@ View account with existing username and password including special skus
     ${STATUS}    ${MSG}=    GET     ${GET_URL}    ${VIEW_INFO}
     Should Be Equal     ${STATUS}    200
     
-    ${MULTIPLIER_QUANTITY}=	Evaluate	${QUANTITY}*4
+    #${MULTIPLIER_QUANTITY}=	Evaluate	${QUANTITY}*4
     @{SPECIAL_SKU_LIST}=	Split String	${SPECIAL_SKUS}	,
     @{SKU_QUANTITY_LIST}=	Create List
     :For	${i}	IN	@{SPECIAL_SKU_LIST}
-    \	&{SPECIAL_SKU_DICT}= 	Create Dictionary	sku=${i}	quantity=${MULTIPLIER_QUANTITY}
+    \	&{SPECIAL_SKU_DICT}= 	Create Dictionary	sku=${i}	quantity=${QUANTITY}
    	\	Append To List	${SKU_QUANTITY_LIST}	${SPECIAL_SKU_DICT}
-	Log List	list_=@{SKU_QUANTITY_LIST}	
-	
-    ${STATUS}=	Verify View Result	${MSG}	${TEST_USERNAME}	${SKU_QUANTITY_LIST}
-    Should Be Equal		${STATUS}	0
-
-View account with existing username and password including JBOSS skus
-	[Documentation]	
-	...	Some JBOSS SKUs: MW0167254,MW0267188,MW0341364
-	...	Related trac ticket https://engineering.redhat.com/trac/content-tests/ticket/311
-	...	For JBoss SKUs the adapters always return unlimited quantity.
-	...	JBoss is core-band capacity, but since there is no reconciliation evaluation for each system against the core-band capacity the adapter returns unlimited. 
-	...	In reality, an unknown number of systems could attach the subscription and the system's cores in use would be decremented against the core-band until the 
-	...	core-band was consumed. When the core-band are completely consumed then the next system to attach would not be able to consume the content (status Red). 
-	...	For now, the consumption is contractual and the quantity is unlimited.
-	...	MW0167254
-	[Tags]    regression
-    ${TEST_USERNAME}=	Create account with accepting terms
-    ${QUANTITY}=	Convert To Integer	${QUANTITY}	
-    Add SKU		${TEST_USERNAME}    ${PASSWORD}     ${JBOSS_SKUS}      ${QUANTITY}
-    Refresh Account		${TEST_USERNAME}    ${PASSWORD}
-    sleep	10
-    
-	${VIEW_INFO}=  Create Dictionary     username=${TEST_USERNAME}    password=${PASSWORD}
-    ${STATUS}    ${MSG}=    GET     ${GET_URL}    ${VIEW_INFO}
-    Should Be Equal     ${STATUS}    200
-    
-    @{JBOSS_SKU_LIST}=	Split String	${JBOSS_SKUS}	,
-    @{SKU_QUANTITY_LIST}=	Create List
-    :For	${i}	IN	@{JBOSS_SKU_LIST}
-    \	&{JBOSS_SKU_DICT}= 	Create Dictionary	sku=${i}	quantity=${UNLIMITED_QUANTITY}
-   	\	Append To List	${SKU_QUANTITY_LIST}	${JBOSS_SKU_DICT}
 	Log List	list_=@{SKU_QUANTITY_LIST}	
 	
     ${STATUS}=	Verify View Result	${MSG}	${TEST_USERNAME}	${SKU_QUANTITY_LIST}
@@ -218,46 +188,35 @@ View account with nothing
 
 *** Keywords ***
 
-View account without skus with existing username and password
-    [Documentation]
-    [Tags]    default
-    # Create one new account without any sku
-    # View this account
-    ${view_info}  Create Dictionary     username=${existing_username}    password=${password}
+View account with existing username and password including JBOSS skus
+	[Documentation]
+	...	Delete this test case for now
+	...		
+	...	Some JBOSS SKUs: MW0167254,MW0267188,MW0341364
+	...	Related trac ticket https://engineering.redhat.com/trac/content-tests/ticket/311
+	...	For JBoss SKUs the adapters always return unlimited quantity.
+	...	JBoss is core-band capacity, but since there is no reconciliation evaluation for each system against the core-band capacity the adapter returns unlimited. 
+	...	In reality, an unknown number of systems could attach the subscription and the system's cores in use would be decremented against the core-band until the 
+	...	core-band was consumed. When the core-band are completely consumed then the next system to attach would not be able to consume the content (status Red). 
+	...	For now, the consumption is contractual and the quantity is unlimited.
+	...	MW0167254
+	[Tags]    regression
+    ${TEST_USERNAME}=	Create account with accepting terms
+    ${QUANTITY}=	Convert To Integer	${QUANTITY}	
+    Add SKU		${TEST_USERNAME}    ${PASSWORD}     ${JBOSS_SKUS}      ${QUANTITY}
+    Refresh Account		${TEST_USERNAME}    ${PASSWORD}
+    sleep	10
     
-    Create Session  httpbin  http://httpbin.org
-    &{data}=  Create Dictionary  name=bulkan  surname=evcimen
-    &{headers}=  Create Dictionary  Content-Type=application/x-www-form-urlencoded
-    ${resp}=  Post Request  httpbin  /post  data=${data}  headers=${headers}
-    Dictionary Should Contain Value  ${resp.json()['form']}  bulkan
-    Dictionary Should Contain Value  ${resp.json()['form']}  evcimen
+	${VIEW_INFO}=  Create Dictionary     username=${TEST_USERNAME}    password=${PASSWORD}
+    ${STATUS}    ${MSG}=    GET     ${GET_URL}    ${VIEW_INFO}
+    Should Be Equal     ${STATUS}    200
     
-    Log     ${resp.headers}
-    
-    # Check
-    #Create Session  google  http://www.google.com
-    #Create Session  github  https://api.github.com
-    #${resp}=  Get Request  google  /
-    #Should Be Equal As Strings  ${resp.status_code}  200
-    
-    Log     ${resp.text}
-    Log     ${resp.status_code}
-
-    #${resp}=  Get Request  github  /users/bulkan
-    #Should Be Equal As Strings  ${resp.status_code}  200
-    #Dictionary Should Contain Value  ${resp.json()}  Bulkan Evcimen
-
-    
-View account without skus with existing username and password --
-    [Documentation]
-    [Tags]    default
-    # Create one new account without any sku
-    # View this account
-    ${view_info}  Create Dictionary     username=${existing_username}    password=${password}
-    
-    Create Session  httpbin  http://httpbin.org
-    &{data}=  Create Dictionary  name=bulkan  surname=evcimen
-    &{headers}=  Create Dictionary  Content-Type=application/x-www-form-urlencoded
-    ${resp}=  Post Request  httpbin  /post  data=${data}  headers=${headers}
-    Dictionary Should Contain Value  ${resp.json()['form']}  bulkan
-    Dictionary Should Contain Value  ${resp.json()['form']}  evcimen
+    @{JBOSS_SKU_LIST}=	Split String	${JBOSS_SKUS}	,
+    @{SKU_QUANTITY_LIST}=	Create List
+    :For	${i}	IN	@{JBOSS_SKU_LIST}
+    \	&{JBOSS_SKU_DICT}= 	Create Dictionary	sku=${i}	quantity=${UNLIMITED_QUANTITY}
+   	\	Append To List	${SKU_QUANTITY_LIST}	${JBOSS_SKU_DICT}
+	Log List	list_=@{SKU_QUANTITY_LIST}	
+	
+    ${STATUS}=	Verify View Result	${MSG}	${TEST_USERNAME}	${SKU_QUANTITY_LIST}
+    Should Be Equal		${STATUS}	0

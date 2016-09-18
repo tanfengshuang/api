@@ -1,87 +1,323 @@
 *** Setting ***
-Library           Collections
-Library           OperatingSystem
-Library           String
-Library           BuiltIn
-Library           Dialogs
-Library				Screenshot
-Library           Selenium2Library    run_on_failure=Capture Page Screenshot    implicit_wait=0
+Library			Collections
+Library			OperatingSystem
+Library			String
+Library			BuiltIn
+Library			Dialogs
+Library			Screenshot
+Library			Selenium2Library    run_on_failure=Capture Page Screenshot    implicit_wait=0
 
 *** Variables ***
-${SERVER}         10.3.12.152
-#${SERVER}			localhost:8080
-${BROWSER}        firefox
-#${BROWSER}        chrome
-${REMOTE_URL}     ${NONE}
-${DESIRED_CAPABILITIES}    ${NONE}
-${ROOT}           http://${SERVER}
-${FRONT PAGE}     ${ROOT}
-${SPEED}          0
+${SERVER}				account-manager-stage.app.eng.rdu2.redhat.com
+#10.3.12.152
+${BROWSER}				firefox
+#${BROWSER}				chrome
+${REMOTE_URL}			${NONE}
+${DESIRED_CAPABILITIES}	${NONE}
+${TITLE}				Ethel
+${ROOT}					http://${SERVER}
+${FRONT_PAGE}			${ROOT}
+${CREATE_PAGE}			${ROOT}/#create
+${VIEW_PAGE}			${ROOT}/#view
+${ACTIVATE_PAGE}		${ROOT}/#activate
+${IMPORT_EXPORT_PAGE}	${ROOT}/#import_export
+${ENTITLE_PAGE}			${ROOT}/#entitle
+${REFRESH_PAGE}			${ROOT}/#refresh
+${SEARCH_PAGE}			${ROOT}/#search_basic
+${ADVANCED_SEARCH_PAGE}	${ROOT}/#search_advanced
+${SPEED}          		0
 
-${BUG_URL}			https://engineering.redhat.com/trac/content-tests/newticket?component=Stage+Account+Management+Tool&milestone=Account+Tool&type=account+tool+defect&cc=entitlement-qe@redhat.com
+${BUG_URL}				https://engineering.redhat.com/trac/content-tests/newticket?component=Stage+Account+Management+Tool&milestone=Account+Tool&type=account+tool+defect&cc=entitlement-qe@redhat.com
 ${STAGE_PORTAL_URL}		https://access.stage.redhat.com/
+${MOJO_PAGE_URL}		https://mojo.redhat.com/docs/DOC-953386
 
-${FIRST_NAME}		Fengshuang
-${LAST_NAME}		Tan
-${EXISTING_USERNAME}    aaa 
+${FIRST_NAME}			Fengshuang
+${LAST_NAME}			Tan
+
+${EXISTING_USERNAME}    existing_account 
 ${PASSWORD}             redhat
 ${WRONG_PASSWORD}       redhat111
-${SPECIAL_USERNAME}		special_username	
-${SPECIAL_PASSWORD}		redhat\\\\
+${LONG_PASSWORD}		123456789012345678901234567890
 ${SKU}                  RH0103708
-${SKUS}                 RH0103708,MCT1111,RH0103708AAA,MCT1316F3,MCT1339 
-${WRONG_SKU}            RH0103708AAA
-${WRONG_SKUS}           RH0103708AAA,MCT1316F3BBB
+${SKUS}                 RH0103708,MCT1316F3,MCT1339 
+${INVALID_SKU}			RH0103708AAA
+${INVALID_SKUS}			RH0103708AAA,MCT1316F3BBB
+${SPECIAL_SKU}			MCT0891
+${SPECIAL_SKUS}			MCT0891,MCT0892,MCT0992
+${JBOSS_SKUS}			MW0167254,MW0267188,MW0341364
 ${QUANTITY}             100
-${NEGTIVE_QUANTITY}    -1 
+${STRING_QUANTITY}		string
+${NEGTIVE_QUANTITY}     -1 
+${UNLIMITED_QUANTITY}	unlimited
+
+${TIMEOUT}			3600
+
+${NOT_ACCEPT_CONTENT}	I have read and agree to the terms
+#Accept Terms & Conditions 
+${ACCEPT_CONTENT}		Red Hat Account Number
+
+#ERROR
+${NOT_VISIBLE_ERROR}	ElementNotVisibleException: Message: Element is not currently visible and so may not be interacted with
+
+# Create
+${Create_Username_Link}			//form[@id='account_new']/div/div/input[@id='username']
+${Create_Password_Link}			//form[@id='account_new']/div/div/input[@id='password']
+${Create_FirstName_Link}		//form[@id='account_new']/div/div/input[@id='first_name']
+${Create_LastName_Link}			//form[@id='account_new']/div/div/input[@id='last_name']
+${Create_SKU_Link}				//form[@id='account_new']/div/div/input[@id='sku']
+${Create_Quantity_Link}			//form[@id='account_new']/div/div/input[@id='quantity']
+${Create_ExpirationDate_Link}	//form[@id='account_new']/div/div/input[@id='expire']
+${Create_Create_Link}			//form[@id='account_new']/div/div/input[@id='submit']
+
+# View
+${View_Username_Link}	//form[@id='account_view']/div/div/input[@id='username']
+${View_Password_Link}	//form[@id='account_view']/div/div/input[@id='password']
+${View_View_Link}		//form[@id='account_view']/div/div/input[@id='submit']
+
+# Add
+${Add_Username_Link}	//form[@id='pool_create']/div/div/input[@id='username']
+${Add_Password_Link}	//form[@id='pool_create']/div/div/input[@id='password']
+${Add_SKUs_Link}		//form[@id='pool_create']/div/div/input[@id='sku']
+${Add_Quntity_Link}		//form[@id='pool_create']/div/div/input[@id='quantity']
+${Add_Expiration_Link}	//
+${Add_Entitle_Link}		//form[@id='pool_create']/div/div/input[@id='submit']
+
+# Activate
+${Activate_Username_Link}	//form[@id='account_terms']/div/div/input[@id='username']
+${Activate_Password_Link}	//form[@id='account_terms']/div/div/input[@id='password']
+${Activate_Accept_Link}		//form[@id='account_terms']/div/div/input[@id='submit']
+
+# Refresh
+${Refresh_Username_Link}	//form[@id='pool_refresh']/div/div/input[@id='username']
+${Refresh_Password_Link}	//form[@id='pool_refresh']/div/div/input[@id='password']
+${Refresh_Refresh_Link}		//form[@id='pool_refresh']/div/div/input[@id='submit']
+
+# Import or Export
+${Refresh_Username_Link}	//form[@id='pool_refresh']/div/div/input[@id='username']
+${Refresh_Password_Link}	//form[@id='pool_refresh']/div/div/input[@id='password']
+${Refresh_Refresh_Link}		//form[@id='pool_refresh']/div/div/input[@id='submit']
+${Export_Username_Link}		//form[@id='export-form']/div/div/div/div[2]/div[2]/div/div/div/div/input[@id='username']
+${Export_Password_Link}		//form[@id='export-form']/div/div/div/div[2]/div[2]/div/div/div[2]/div/input[@id='password']
+
+# Search
+${Search_Submit_Link}							//form[@id='search_basic_form']/div/div/button[@id='submit']
+${Search_Criterion_Link}						//form[@id='search_basic_form']/div/div/button
+${Search_ProuductNameSelect_Link}				//*[@id='ph_product_name']
+#//form[@id='search_basic_form']/div/select[@id='ph_product_name']
+${Search_SKUInput_Link}							//form[@id='search_basic_form']/div/input[@id='id']
+${Search_Table_Link}							//table[@id="DataTables_Table_0"]
+${Search_TableLabels_Link}						//*[@id='search']/div/div[1]/div/div/div[2]/div[1]/button
+${Search_TableColumns_Link}						//*[@id='search']/div/div[1]/div/div/div[2]/div[2]/button
+${Search_TableTotalNumber_Link}					//*[@id='DataTables_Table_0_info']/strong
+${Search_TableZeroNumber_Link}					//*[@id='DataTables_Table_0_info']/b
+${Search_TablePageNumber_Link}					//*[@id='DataTables_Table_0_paginate']/div/span/b
+${AdvancedSearch_Submit_Link}					//form[@id='search_advanced_form']/div/div/button[@id='submit']
+${AdvancedSearch_Attribute_Link}				//*[@id='search_advanced_form']/div[1]/div[1]/div[1]/button
+${AdvancedSearch_StringAttributeOperator_Link}	//*[@id='search_advanced_form']/div[1]/div[1]/div[2]/button
+${AdvancedSearch_StringAttributeInput_Link}		//*[@id='search_advanced_form']/div[1]/div[1]/input[1]
+${AdvancedSearch_IntegerAttributeOperator_Link}	//*[@id='search_advanced_form']/div[1]/div[1]/div[4]/button
+${AdvancedSearch_IntegerAttributeInput_Link}	//*[@id='search_advanced_form']/div[1]/div[1]/input[2]
+${AdvancedSearch_BooleanTrue_Link}				//*[@id='search_advanced_form']/div[1]/div[1]/div[3]/div/div/span[1]
+${AdvancedSearch_BooleanFalse_Link}				//*[@id='search_advanced_form']/div[1]/div[1]/div[3]/div/div/span[3]
+
+${AdvancedSearch_SecondFilter_Attribute_Link}					//*[@id='search_advanced_form']/div[1]/div[2]/div[1]/button
+${AdvancedSearch_SecondFilter_StringAttributeOperator_Link}		//*[@id='search_advanced_form']/div[1]/div[2]/div[2]/button
+${AdvancedSearch_SecondFilter_StringAttributeInput_Link}		//*[@id='search_advanced_form']/div[1]/div[2]/input[1]
+${AdvancedSearch_SecondFilter_IntegerAttributeOperator_Link}	//*[@id='search_advanced_form']/div[1]/div[2]/div[4]/button
+${AdvancedSearch_SecondFilter_IntegerAttributeInput_Link}		//*[@id='search_advanced_form']/div[1]/div[2]/input[2]
+${AdvancedSearch_SecondFilter_BooleanTrue_Link}					//*[@id='search_advanced_form']/div[1]/div[2]/div[3]/div/div/span[1]
+${AdvancedSearch_SecondFilter_BooleanFalse_Link}				//*[@id='search_advanced_form']/div[1]/div[2]/div[3]/div/div/span[3]
+
+${AdvancedSearch_ThirdFilter_Attribute_Link}					//*[@id='search_advanced_form']/div[1]/div[3]/div[1]/button
+${AdvancedSearch_ThirdFilter_StringAttributeOperator_Link}		//*[@id='search_advanced_form']/div[1]/div[3]/div[2]/button
+${AdvancedSearch_ThirdFilter_StringAttributeInput_Link}			//*[@id='search_advanced_form']/div[1]/div[3]/input[1]
+${AdvancedSearch_ThirdFilter_IntegerAttributeOperator_Link}		//*[@id='search_advanced_form']/div[1]/div[3]/div[4]/button
+${AdvancedSearch_ThirdFilter_IntegerAttributeInput_Link}		//*[@id='search_advanced_form']/div[1]/div[3]/input[2]
+${AdvancedSearch_ThirdFilter_BooleanTrue_Link}					//*[@id='search_advanced_form']/div[1]/div[3]/div[3]/div/div/span[1]
+${AdvancedSearch_ThirdFilter_BooleanFalse_Link}					//*[@id='search_advanced_form']/div[1]/div[3]/div[3]/div/div/span[3]
+
+${AdvancedSearch_FourthFilter_Attribute_Link}					//*[@id='search_advanced_form']/div[1]/div[4]/div[1]/button
+${AdvancedSearch_FourthFilter_StringAttributeOperator_Link}		//*[@id='search_advanced_form']/div[1]/div[4]/div[2]/button
+${AdvancedSearch_FourthFilter_StringAttributeInput_Link}		//*[@id='search_advanced_form']/div[1]/div[4]/input[1]
+${AdvancedSearch_FourthFilter_IntegerAttributeOperator_Link}	//*[@id='search_advanced_form']/div[1]/div[4]/div[4]/button
+${AdvancedSearch_FourthFilter_IntegerAttributeInput_Link}		//*[@id='search_advanced_form']/div[1]/div[4]/input[2]
+${AdvancedSearch_FourthFilter_BooleanTrue_Link}					//*[@id='search_advanced_form']/div[1]/div[4]/div[3]/div/div/span[1]
+${AdvancedSearch_FourthFilter_BooleanFalse_Link}				//*[@id='search_advanced_form']/div[1]/div[4]/div[3]/div/div/span[3]
+
+${AdvancedSearch_FifthFilter_Attribute_Link}					//*[@id='search_advanced_form']/div[1]/div[5]/div[1]/button
+${AdvancedSearch_FifthFilter_StringAttributeOperator_Link}		//*[@id='search_advanced_form']/div[1]/div[5]/div[2]/button
+${AdvancedSearch_FifthFilter_StringAttributeInput_Link}			//*[@id='search_advanced_form']/div[1]/div[5]/input[1]
+${AdvancedSearch_FifthFilter_IntegerAttributeOperator_Link}		//*[@id='search_advanced_form']/div[1]/div[5]/div[4]/button
+${AdvancedSearch_FifthFilter_IntegerAttributeInput_Link}		//*[@id='search_advanced_form']/div[1]/div[5]/input[2]
+${AdvancedSearch_FifthFilter_BooleanTrue_Link}					//*[@id='search_advanced_form']/div[1]/div[5]/div[3]/div/div/span[1]
+${AdvancedSearch_FifthFilter_BooleanFalse_Link}					//*[@id='search_advanced_form']/div[1]/div[5]/div[3]/div/div/span[3]
+
+${AdvancedSearch_DeleteFilter_Link}								//*[@id='search_advanced_form']/div[1]/div[2]/a/span
+
+# Column Number in search result table
+${Table_SKUName_ColumnNumber}								1
+${Table_ProductHierarchyProductCategory_ColumnNumber}		2
+${Table_ProductHierarchyProductLine_ColumnNumber}			3
+${Table_ProductHierarchyProductName_ColumnNumber}			4
+${Table_ProductName_ColumnNumber}							5
+${Table_VirtLimit_ColumnNumber}								6
+${Table_Sockets_ColumnNumber}								7
+${Table_VCPU_ColumnNumber}									8
+${Table_Multiplier_ColumnNumber}							9
+${Table_UnlimitedProduct_ColumnNumber}						10
+${Table_RequiredConsumerType_ColumnNumber}					11
+${Table_ProductFamily_ColumnNumber}							12
+${Table_ManagementEnabled_ColumnNumber}						13
+${Table_Variant_ColumnNumber}								14
+${Table_SupportLevel_ColumnNumber}							15
+${Table_SupportType_ColumnNumber}							16
+${Table_EnabledConsumerTypes_ColumnNumber}					17
+${Table_Virt-only_ColumnNumber}								18
+${Table_Cores_ColumnNumber}									19
+${Table_JONManagement_ColumnNumber}							20
+${Table_RAM_ColumnNumber}									21
+${Table_InstanceBasedVirtMultiplier_ColumnNumber}			22
+${Table_CloudAccessEnabled_ColumnNumber}					23
+${Table_StackingID_ColumnNumber}							24
+${Table_MultiEntitlement_ColumnNumber}						25
+${Table_HostLimited_ColumnNumber}							26
+${Table_DerivedSKU_ColumnNumber}							27
+${Table_Arch_ColumnNumber}									28
+${Table_EngProductIDs_ColumnNumber}							29
+${Table_Username_ColumnNumber}								30
+
+
+${candlepin_internal_list}		id,
+								...	ph_category,
+								...	ph_product_line,
+								...	ph_product_name,
+								...	name,
+								...	virt_limit,
+								...	sockets,
+								...	vcpu,
+								...	multiplier,
+								...	unlimited_product,
+								...	requires_consumer_type,
+								...	product_family,
+								...	management_enabled,
+								...	variant,
+								...	support_level,
+								...	support_type,
+								...	enabled_consumer_types,
+								...	virt_only,
+								...	cores,
+								...	jon_management,
+								...	ram,
+								...	instance_multiplier,
+								...	cloud_access_enabled,
+								...	stacking_id,
+								...	multi_entitlement,
+								...	host_limited,
+								...	derived_sku,
+								...	arch,
+								...	eng_product_ids,
+								...	username
+${verbose_name_list}			SKU Name,
+								...	Product Hierarchy: Product Category,
+								...	Product Hierarchy: Product Line,
+								...	Product Hierarchy: Product Name,
+								...	Product Name,
+								...	Virt Limit,
+								...	Socket(s),
+								...	VCPU,
+								...	Multiplier,
+								...	Unlimited Product,
+								...	Required Consumer Type,
+								...	Product Family,
+								...	Management Enabled,
+								...	Variant,
+								...	Support Level,
+								...	Support Type,
+								...	Enabled Consumer Types,
+								...	Virt-only,
+								...	Cores,
+								...	JON Management,
+								...	RAM,
+								...	Instance Based Virt Multiplier,
+								...	Cloud Access Enabled,
+								...	Stacking ID,
+								...	Multi Entitlement,
+								...	Host Limited,
+								...	Derived SKU,
+								...	Arch,
+								...	Eng Product ID(s),
+								...	Username
+
+${verbose_name_candlepin_internal_list}		SKU Name\nid,
+											...	Product Hierarchy: Product Category\nph_category,
+											...	Product Hierarchy: Product Line\nph_product_line,
+											...	Product Hierarchy: Product Name\nph_product_name,
+											...	Product Name\nname,
+											...	Virt Limit\nvirt_limit,
+											...	Socket(s)\nsockets,
+											...	VCPU\nvcpu,
+											...	Multiplier\nmultiplier,
+											...	Unlimited Product\nunlimited_product,
+											...	Required Consumer Type\nrequires_consumer_type,
+											...	Product Family\nproduct_family,
+											...	Management Enabled\nmanagement_enabled,
+											...	Variant\nvariant,
+											...	Support Level\nsupport_level,
+											...	Support Type\nsupport_type,
+											...	Enabled Consumer Types\nenabled_consumer_types,
+											...	Virt-only\nvirt_only,
+											...	Cores\ncores,
+											...	JON Management\njon_management,
+											...	RAM\nram,
+											...	Instance Based Virt Multiplier\ninstance_multiplier,
+											...	Cloud Access Enabled\ncloud_access_enabled,
+											...	Stacking ID\nstacking_id,
+											...	Multi Entitlement\nmulti_entitlement,
+											...	Host Limited\nhost_limited,
+											...	Derived SKU\nderived_sku,
+											...	Arch\narch,
+											...	Eng Product ID(s)\neng_product_ids,
+											...	Username\nusername
+
 
 *** Keywords ***
 Generate Username
     [Documentation]
+    ...	Generate one username
     [Tags]    global
     ${time}    Get Time    epoch
     ${random_str}=    Generate Random String    length=4    chars=[LOWER]
     ${username}=    Catenate    user${time}${random_str}
-    #${create_info}    Create Dictionary     username=${username}    password=${password}
     [Return]    ${username}
 
-Open Account Test Page
+Verify result after create account successfully
     [Documentation]
-	[Arguments]   ${TEST_PAGE}
-	Maximize Browser Window
-    Go to Front Page
-    Wait Until Page Contains Element   link=${TEST_PAGE}
-    Click Link       ${TEST_PAGE}
-
-Success Created
-    [Documentation]
+    ...	Only create account, not add any skus
 	[Arguments]   ${TEST_USERNAME}
     ${SUCCESS_MESSAGE}=   Catenate  Creating account "${TEST_USERNAME}"
-    Wait Until Page Contains   ${SUCCESS_MESSAGE}	timeout=20
+    Wait Until Page Contains   ${SUCCESS_MESSAGE}	timeout=50
     ${SUCCESS_MESSAGE}=   Catenate  Accepting Ts&Cs for "${TEST_USERNAME}"
-    Wait Until Page Contains   ${SUCCESS_MESSAGE}	timeout=20 
-    #${SUCCESS_MESSAGE}=   Catenate  Mapping account into Candlepin
+    Wait Until Page Contains   ${SUCCESS_MESSAGE}	timeout=50 
     ${SUCCESS_MESSAGE}=   Set Variable  Creating account owners in Candlepin
-    Wait Until Page Contains   ${SUCCESS_MESSAGE}	timeout=20
+    Wait Until Page Contains   ${SUCCESS_MESSAGE}	timeout=50
     ${SUCCESS_MESSAGE}=   Catenate  Account "${TEST_USERNAME}" created
-    Wait Until Page Contains   ${SUCCESS_MESSAGE}	timeout=20
-    #${SUCCESS_MESSAGE}=   Catenate  Userspace for "${TEST_USERNAME}" account's subscriptions prepared.
-    #Wait Until Page Contains   ${SUCCESS_MESSAGE}	timeout=20
+    Wait Until Page Contains   ${SUCCESS_MESSAGE}	timeout=50
 
-Success Created and Attach
+Verify result after create create and add sku successfully
  	[Documentation] 
- 	[Arguments]   ${TEST_USERNAME}	${SKUS}  
- 	Log	 Waiting
-
-Created without accepting terms
-	[Documentation]
-	[Arguments]   ${TEST_USERNAME}
-	${SUCCESS_MESSAGE}=   Catenate  Creating account "${TEST_USERNAME}"
-    Wait Until Page Contains   ${SUCCESS_MESSAGE}	timeout=20 
-    ${SUCCESS_MESSAGE}=   Catenate  Creating account owners in Candlepin
-    Wait Until Page Contains   ${SUCCESS_MESSAGE}	timeout=40 
+ 	...	Create account and add sku
+ 	...	For 'Create' Page
+ 	[Arguments]   ${TEST_USERNAME}  
+ 	${SUCCESS_MESSAGE}=   Catenate  Creating account "${TEST_USERNAME}"
+    Wait Until Page Contains   ${SUCCESS_MESSAGE}	timeout=50
+    ${SUCCESS_MESSAGE}=   Catenate  Accepting Ts&Cs for "${TEST_USERNAME}"
+    Wait Until Page Contains   ${SUCCESS_MESSAGE}	timeout=50 
+    ${SUCCESS_MESSAGE}=   Set Variable  Adding subscriptions to "${TEST_USERNAME}"
+    Wait Until Page Contains   ${SUCCESS_MESSAGE}	timeout=70
+    ${SUCCESS_MESSAGE}=   Set Variable  Creating account owners in Candlepin
+    Wait Until Page Contains   ${SUCCESS_MESSAGE}	timeout=70
     ${SUCCESS_MESSAGE}=   Catenate  Account "${TEST_USERNAME}" created
-    Wait Until Page Contains   ${SUCCESS_MESSAGE}	timeout=40 
+    Wait Until Page Contains   ${SUCCESS_MESSAGE}	timeout=70
 
 Check Terms Status
 	[Documentation]	
@@ -96,41 +332,39 @@ Check Terms Status
     Click Element  id=_eventId_submit
     Wait Until Page Contains	${CONTENT}
 	
-Success Attached
+Verify result after add sku successfully
 	[Documentation]
+	...	For 'Add Subscriptions' Page
 	[Arguments]   ${TEST_USERNAME}
 	${SUCCESS_MESSAGE}=   Catenate  Accepting Ts&Cs for "${TEST_USERNAME}"
     Wait Until Page Contains   ${SUCCESS_MESSAGE}	timeout=50
-    ${SUCCESS_MESSAGE}=   Catenate  Attaching subscriptions to "${TEST_USERNAME}"
+    ${SUCCESS_MESSAGE}=   Catenate  Adding subscriptions to "${TEST_USERNAME}"
     Wait Until Page Contains   ${SUCCESS_MESSAGE}	timeout=20
-    ${SUCCESS_MESSAGE}=   Set Variable  	All pools successfully attached
+    ${SUCCESS_MESSAGE}=   Set Variable  	All pools successfully added
     Wait Until Page Contains   ${SUCCESS_MESSAGE}	    timeout=500
 
-Success Attached without accepting terms
+Verify result after add sku when uncheck terms button
+	#Success Attached without accepting terms
 	[Documentation]
+	...	For 'Add Subscriptions' Page
 	[Arguments]   ${TEST_USERNAME}
-    ${SUCCESS_MESSAGE}=   Catenate  Attaching subscriptions to "${TEST_USERNAME}"
+    ${SUCCESS_MESSAGE}=   Catenate  Adding subscriptions to "${TEST_USERNAME}"
     Wait Until Page Contains   ${SUCCESS_MESSAGE}
-    ${SUCCESS_MESSAGE}=   Set Variable  	All pools successfully attached
-    Wait Until Page Contains   ${SUCCESS_MESSAGE}	    timeout=500
-    
-Success Refreshed
-	[Documentation]
-	[Arguments]   ${TEST_USERNAME}
-    ${SUCCESS_MESSAGE}=   Catenate  Refreshing subscriptions for "${TEST_USERNAME}"
-    Wait Until Page Contains   ${SUCCESS_MESSAGE}		timeout=500
-    ${SUCCESS_MESSAGE}=   Set Variable  	All pools successfully refreshed
+    ${SUCCESS_MESSAGE}=   Set Variable  	All pools successfully added
     Wait Until Page Contains   ${SUCCESS_MESSAGE}	    timeout=500
         
 Test File a bug Link
 	[Documentation]
+	@{L1}=	List Windows
 	Wait Until Page Contains Element		link=File a bug
-    # Test File a bug later
+	Sleep	0.1
     Click Element	link=File a bug
-    #Open Browser	${BUG_URL}		${BROWSER}
-    Select Window	url=${BUG_URL}
+    @{L2}=	List Windows
+    Select Window	new
     Maximize Browser Window
-	Wait Until Page Contains	Create New Ticket 
+	Wait Until Page Contains	Create New Ticket	20
+	Location should be	${BUG_URL}
+	Close Window
 	Select Window
 
 Open Browser To Start Page
@@ -190,3 +424,84 @@ Set ${level} Loglevel
 Verify Location Is "${relative url}"
     [Documentation]    Verifies location
     Location Should Be    ${ROOT}/${relative url}
+    
+    
+    
+    
+#################################################
+##                     Search                  ##
+#################################################   
+ 
+Table Header Check
+	[Documentation]
+	[Arguments]   ${header_list}
+	#@{header_list} 	Evaluate	${header_list}.split(",")
+	@{header_list}=	Split String	${header_list}	,
+	:FOR	${i} 	IN		@{header_list}
+	\	${i}=	Strip String	${i}
+	\	Table Header Should Contain		xpath=${Search_Table_Link}		${i}
+
+Verify Table Header Column Title
+	[Documentation]
+	[Arguments]   ${xpath}	${value}
+	Click Element		xpath=${xpath}
+    ${cell_content}=		Get Table Cell		xpath=${Search_Table_Link}		1		-1
+    Should Be Equal		${cell_content}    ${value}	
+
+Get Total Number of Table Items
+	[Documentation]
+	${string_length}=	Get Text	xpath=${Search_TableTotalNumber_Link}
+	${length}=	Replace String	${string_length}	,	${EMPTY}
+	${length}=	Convert To Integer	${length}
+	[Return]	${length}
+
+Loop Table To Verify Equal
+	[Documentation]
+	[Arguments]    ${length}	${column}	${str}
+	:For	${i}	in range	${length}
+	\	${row_number}=		Evaluate	2+${i}
+	\	${cell_content}=	Get Table Cell	xpath=${Search_Table_Link}	${row_number}	${column}
+	\	Should Be Equal		${cell_content}	${str}
+
+Loop Table To Verify Not Equal
+	[Documentation]
+	[Arguments]    ${length}	${column}	${str}
+	:For	${i}	in range	${length}
+	\	${row_number}=		Evaluate	2+${i}
+	\	${cell_content}=	Get Table Cell	xpath=${Search_Table_Link}	${row_number}	${column}
+	\	Should Not Be Equal		${cell_content}	${str}
+
+Loop Table To Verify Contain
+	[Documentation]
+	[Arguments]    ${length}	${column}	${str}
+	:For	${i}	in range	${length}
+	\	${row_number}=		Evaluate	2+${i}
+	\	${cell_content}=	Get Table Cell	xpath=${Search_Table_Link}	${row_number}	${column}
+	\	Table Cell Should Contain     xpath=${Search_Table_Link}	${row_number}	${column}     ${str}
+	
+Loop Table To Verify Not Contain
+	[Documentation]
+	[Arguments]    ${length}	${column}	${str}
+	:For	${i}	in range	${length}
+	\	${row_number}=		Evaluate	2+${i}
+	\	${cell_content}=		Get Table Cell		xpath=${Search_Table_Link}		${row_number}		${column}
+	\	Should Not Contain		${cell_content}	${str}
+	
+Loop Table To Verify Greater Than
+	[Documentation]
+	[Arguments]    ${length}	${column}	${int}
+	:For	${i}	in range	${length}
+	\	${row_number}=		Evaluate	2+${i}
+	\	${cell_content}=		Get Table Cell		xpath=${Search_Table_Link}		${row_number}		${column}
+	\	Should Be True		${cell_content}	> ${int}
+	
+Loop Table To Verify Less Then
+	[Documentation]
+	[Arguments]    ${length}	${column}	${int}
+	:For	${i}	in range	${length}
+	\	${row_number}=		Evaluate	2+${i}
+	\	${cell_content}=		Get Table Cell		xpath=${Search_Table_Link}		${row_number}		${column}
+	\	Should Be True		${cell_content}	< ${int}
+
+
+

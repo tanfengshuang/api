@@ -18,7 +18,8 @@ ${REFRESH_URL}      ${URL}/account/refresh
 ${SEARCH_URL}       ${URL}/search
 ${ACTIVATE_URL}		${URL}/account/activate
 
-${EXISTING_USERNAME}    aaa 
+${LESS_USERNAME}		aaa
+${EXISTING_USERNAME}    existing_account 
 ${PASSWORD}             redhat
 ${WRONG_PASSWORD}       redhat111
 ${SKU}                  RH0103708

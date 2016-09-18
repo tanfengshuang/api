@@ -7,7 +7,7 @@ Resource        ../resources/global.txt
 
 *** Test Cases ***    
 Add subscriptions to a account without accepting terms
-	[Documentation]		(integer > 0)
+	[Documentation]
 	[Tags]    regression
 	@{SKU_LIST}=	Split String	${SKUS}	,
 	${TEST_USERNAME}=	Create account without accepting terms
@@ -20,8 +20,8 @@ Add subscriptions to a account without accepting terms
     \	${STATUS}=	Verify SKU	${SKU}	${TEST_USERNAME}	${PASSWORD}
     \	Should Be Equal     ${STATUS}   0
 
-Add subscriptions with existing username, password, sku and quantity
-	[Documentation]		(integer > 0)
+Add subscriptions with existing username, password, valid sku and quantity
+	[Documentation]
 	[Tags]    regression
 	${TEST_USERNAME}=	Create account with accepting terms
 	${QUANTITY}=	Convert To Integer	${QUANTITY}
@@ -31,8 +31,8 @@ Add subscriptions with existing username, password, sku and quantity
     ${STATUS}=	Verify SKU      ${SKU}	${TEST_USERNAME}	${PASSWORD}
     Should Be Equal     ${STATUS}    0
     
-Add subscriptions with existing username, password, several skus
-	[Documentation]		(including correct and invalid skus) and quantity 
+Add subscriptions with existing username, password, valid skus and quantity
+	[Documentation] 
 	[Tags]    regression
 	@{SKU_LIST}=	Split String	${SKUS}	,
 	${TEST_USERNAME}=	Create account with accepting terms
@@ -75,18 +75,18 @@ Add subscriptions with existing username, password, sku and string quantity
     ${ADD_INFO}=  Create Dictionary     username=${EXISTING_USERNAME}    password=${PASSWORD}     sku=${SKU_LIST}      quantity=${STRING_QUANTITY}
     ${STATUS}    ${MSG}=    POST    ${ADD_URL}   ${ADD_INFO}
     Should Be Equal     ${STATUS}   400
-    ${SUCCESS_MSG}=		Catenate	Bad request: 'Invalid quantity value'
+    ${SUCCESS_MSG}=		Catenate	Bad request: Value of 'quantity' parameter is not valid input, reason: Quantity has to be of integer type and greater than 0
     Should Be Equal      ${MSG}      ${SUCCESS_MSG}
         
 Add subscriptions with existing username, password, sku and null quantity
-    [Documentation]		Is it neccessary to check default quantity?
+    [Documentation]
     [Tags]    regression
     ${TEST_USERNAME}=	Create account with accepting terms
     @{SKU_LIST}=	Split String	${SKU}	,
     ${ADD_INFO}=  Create Dictionary     username=${TEST_USERNAME}    password=${PASSWORD}     sku=@{SKU_LIST}      quantity=
     ${STATUS}    ${MSG}=    POST    ${ADD_URL}   ${ADD_INFO}
     Should Be Equal     ${STATUS}   400
-    ${SUCCESS_MSG}=		Catenate	Bad request: Parameter 'quantity' is either missing or of wrong type
+    ${SUCCESS_MSG}=		Catenate	Bad request: Value of 'quantity' parameter is not valid input, reason: Quantity has to be of integer type and greater than 0
     Should Be Equal      ${MSG}     ${SUCCESS_MSG}
     
 Add subscriptions with existing username, password, sku and zero quantity
@@ -97,7 +97,7 @@ Add subscriptions with existing username, password, sku and zero quantity
     ${ADD_INFO}=  Create Dictionary     username=${EXISTING_USERNAME}    password=${PASSWORD}     sku=${SKU_LIST}      quantity=${ZERO_QUANTITY}
     ${STATUS}    ${MSG}=    POST    ${ADD_URL}   ${ADD_INFO}
     Should Be Equal     ${STATUS}   400
-    ${SUCCESS_MSG}=		Catenate	Bad request: 'Invalid quantity value'
+    ${SUCCESS_MSG}=		Catenate	Bad request: Value of 'quantity' parameter is not valid input, reason: Quantity has to be of integer type and greater than 0
     Should Be Equal      ${MSG}      ${SUCCESS_MSG}
     
 Add subscriptions with existing username, password, sku and negative quantity
@@ -108,7 +108,7 @@ Add subscriptions with existing username, password, sku and negative quantity
     ${ADD_INFO}=  Create Dictionary     username=${EXISTING_USERNAME}    password=${PASSWORD}     sku=${SKU_LIST}      quantity=${NEGTIVE_QUANTITY}
     ${STATUS}    ${MSG}=    POST    ${ADD_URL}   ${ADD_INFO}
     Should Be Equal     ${STATUS}   400
-    ${SUCCESS_MSG}=		Catenate	Bad request: 'Invalid quantity value'
+    ${SUCCESS_MSG}=		Catenate	Bad request: Value of 'quantity' parameter is not valid input, reason: Quantity has to be of integer type and greater than 0
     Should Be Equal      ${MSG}      ${SUCCESS_MSG}
     
 Add subscriptions with existing username, password, invalid sku and quantity
@@ -119,7 +119,18 @@ Add subscriptions with existing username, password, invalid sku and quantity
     ${ADD_INFO}=  Create Dictionary     username=${EXISTING_USERNAME}    password=${PASSWORD}     sku=${INVALID_SKU_LIST}      quantity=${QUANTITY}
     ${STATUS}    ${MSG}=    POST    ${ADD_URL}   ${ADD_INFO}
     Should Be Equal     ${STATUS}   400
-    ${SUCCESS_MSG}=		Catenate	Unable to attach SKUs (not found in the DB): [u'${INVALID_SKU}']
+    ${SUCCESS_MSG}=		Catenate	Bad request: Value of 'sku (${INVALID_SKU_LIST})' parameter is not valid input
+    Should Be Equal      ${MSG}      ${SUCCESS_MSG}
+    
+Add subscriptions with existing username, password, invalid skus and quantity
+    [Documentation]
+    [Tags]    regression
+    @{INVALID_SKU_LIST}=	Split String	${INVALID_SKUS}	,
+    ${QUANTITY}=	Convert To Integer	${QUANTITY}
+    ${ADD_INFO}=  Create Dictionary     username=${EXISTING_USERNAME}    password=${PASSWORD}     sku=${INVALID_SKU_LIST}      quantity=${QUANTITY}
+    ${STATUS}    ${MSG}=    POST    ${ADD_URL}   ${ADD_INFO}
+    Should Be Equal     ${STATUS}   400
+    ${SUCCESS_MSG}=		Catenate	Bad request: Value of 'sku (${INVALID_SKU_LIST})' parameter is not valid input
     Should Be Equal      ${MSG}      ${SUCCESS_MSG}
     
 Add subscriptions with existing username, password, invalid sku and zero quantity
@@ -130,7 +141,7 @@ Add subscriptions with existing username, password, invalid sku and zero quantit
     ${ADD_INFO}=  Create Dictionary     username=${EXISTING_USERNAME}    password=${PASSWORD}     sku=${INVALID_SKU_LIST}      quantity=${ZERO_QUANTITY}
     ${STATUS}    ${MSG}=    POST    ${ADD_URL}   ${ADD_INFO}
     Should Be Equal     ${STATUS}   400
-    ${SUCCESS_MSG}=		Catenate	Bad request: 'Invalid quantity value'
+    ${SUCCESS_MSG}=		Catenate	Bad request: Value of 'quantity' parameter is not valid input, reason: Quantity has to be of integer type and greater than 0
     Should Be Equal      ${MSG}      ${SUCCESS_MSG}
     
 Add subscriptions with existing username, null password, sku and quantity
@@ -141,7 +152,8 @@ Add subscriptions with existing username, null password, sku and quantity
     ${ADD_INFO}=  Create Dictionary     username=${EXISTING_USERNAME}    password=     sku=${SKU_LIST}      quantity=${QUANTITY}
     ${STATUS}    ${MSG}=    POST    ${ADD_URL}   ${ADD_INFO}
     Should Be Equal     ${STATUS}   400
-    ${SUCCESS_MSG}=		Catenate	Unable to verify credentials for account '${EXISTING_USERNAME}'
+    #${SUCCESS_MSG}=		Catenate	Unable to verify credentials for account '${EXISTING_USERNAME}'
+    ${SUCCESS_MSG}=		Catenate	Bad request: Value of 'password' parameter is not valid input, reason: Password must be in range of 1-25 characters
     Should Be Equal      ${MSG}      ${SUCCESS_MSG}
     
 Add subscriptions with existing username, wrong password, sku and quantity
@@ -163,8 +175,9 @@ Add subscriptions with null username, null password, sku and quantity
     ${ADD_INFO}=  Create Dictionary     username=    password=     sku=${SKU_LIST}      quantity=${QUANTITY}
     ${STATUS}    ${MSG}=    POST    ${ADD_URL}   ${ADD_INFO}
     Should Be Equal     ${STATUS}   400
-    ${SUCCESS_MSG}=		Catenate	Unable to verify credentials for account ''
-    Should Be Equal      ${MSG}      ${SUCCESS_MSG}
+    #${SUCCESS_MSG}=		Catenate	Unable to verify credentials for account ''
+    ${SUCCESS_MSG}=		Catenate	Bad request: Value of 'username' parameter is not valid input, reason: Login must be at least 5 characters long
+    Should Contain		${MSG}      ${SUCCESS_MSG}
     
 Add subscriptions with new username, password, sku and quantity
     [Documentation]
@@ -185,7 +198,8 @@ Add subscriptions with new username, password, null sku and null quantity
     ${ADD_INFO}=  Create Dictionary     username=${TEST_USERNAME}    password=${PASSWORD}     sku=      quantity=
     ${STATUS}    ${MSG}=    POST    ${ADD_URL}   ${ADD_INFO}
     Should Be Equal     ${STATUS}    400
-    ${SUCCESS_MSG}=		Catenate	Bad request: 'No SKUs listed'
+    #${SUCCESS_MSG}=		Catenate	Bad request: Value of 'quantity' parameter is not valid input
+    ${SUCCESS_MSG}=		Catenate	Bad request: Value of 'sku' parameter is not valid input, reason: List of SKUs must be an Array instance with at least one SKU listed.
     Should Be Equal      ${MSG}      ${SUCCESS_MSG}
 
 Add subscriptions with nothing
@@ -238,13 +252,8 @@ Add subscriptions missing quantity
     ${TEST_USERNAME}=	Create account with accepting terms
     ${ADD_INFO}=  Create Dictionary     username=${TEST_USERNAME}    password=${PASSWORD}     sku=@{SKU_LIST}
     ${STATUS}    ${MSG}=    POST    ${ADD_URL}   ${ADD_INFO}
-    Should Be Equal     ${STATUS}    200
-    # These SKUs have been attached to 'aaa' account: [u'RH0103708']
-    ${SUCCESS_MSG}=		Catenate	These SKUs have been attached to '${TEST_USERNAME}' account: @{SKU_LIST}
+    Should Be Equal     ${STATUS}    400
+    ${SUCCESS_MSG}=		Catenate	Bad request: Parameter 'quantity' is either missing or of wrong type
     Should Be Equal      ${MSG}      ${SUCCESS_MSG}
-    Refresh Account		${TEST_USERNAME}	${PASSWORD}
-    :For	${sku}	in	@{SKU_LIST}
-    \	${STATUS}=	Verify SKU	${sku}	${TEST_USERNAME}	${PASSWORD}
-    \	Should Be Equal     ${STATUS}   0
 
 *** Keywords ***
