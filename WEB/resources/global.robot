@@ -34,6 +34,7 @@ ${MOJO_PAGE_URL}		https://mojo.redhat.com/docs/DOC-953386
 ${FIRST_NAME}			Fengshuang
 ${LAST_NAME}			Tan
 
+${NOT_EXISTING_USERNAME}    not_existing_account 
 ${EXISTING_USERNAME}    existing_account 
 ${PASSWORD}             redhat
 ${WRONG_PASSWORD}       redhat111
@@ -93,11 +94,14 @@ ${Refresh_Password_Link}	//form[@id='pool_refresh']/div/div/input[@id='password'
 ${Refresh_Refresh_Link}		//form[@id='pool_refresh']/div/div/input[@id='submit']
 
 # Import or Export
-${Refresh_Username_Link}	//form[@id='pool_refresh']/div/div/input[@id='username']
-${Refresh_Password_Link}	//form[@id='pool_refresh']/div/div/input[@id='password']
-${Refresh_Refresh_Link}		//form[@id='pool_refresh']/div/div/input[@id='submit']
-${Export_Username_Link}		//form[@id='export-form']/div/div/div/div[2]/div[2]/div/div/div/div/input[@id='username']
-${Export_Password_Link}		//form[@id='export-form']/div/div/div/div[2]/div[2]/div/div/div[2]/div/input[@id='password']
+${Import_Import_Link}					//form[@id='import_form']/div[2]/div[3]/div/input[@id='submit']
+${Import_AcceptTerms_Link}				//form[@id='import_form']/div[2]/div[3]/div[2]/input[@id='accept']
+${Import_FirstAccountItem_Link}			//form[@id='import_form']/div[2]/div[2]/div/div/div/div[2]
+${Import_SecondAccountItem_Link}		//form[@id='import_form']/div[2]/div[2]/div/div/div/div[2]
+${Import_ImportAdditionalBackup_Link}	//form[@id='import_form']/div[2]/div[4]/div/button
+${Export_Username_Link}					//form[@id='export-form']/div/div/div/div[2]/div[2]/div/div/div/div/input[@id='username']
+${Export_Password_Link}					//form[@id='export-form']/div/div/div/div[2]/div[2]/div/div/div[2]/div/input[@id='password']
+${Export_Import_Link}					//form[@id='export-form']/div/div/input[@id='submit']
 
 # Search
 ${Search_Submit_Link}							//form[@id='search_basic_form']/div/div/button[@id='submit']
