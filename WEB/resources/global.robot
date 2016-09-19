@@ -3,8 +3,8 @@ Library			Collections
 Library			OperatingSystem
 Library			String
 Library			BuiltIn
-Library			Dialogs
-Library			Screenshot
+#Library			Dialogs
+#Library			Screenshot
 Library			Selenium2Library    run_on_failure=Capture Page Screenshot    implicit_wait=0
 
 *** Variables ***
