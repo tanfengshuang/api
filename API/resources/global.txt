@@ -10,7 +10,8 @@ Library         ../libs/Account_Utils.py
 *** Variables ***
 ${HEAD}            {'content-type':'application/json'}
 
-${URL}              http://10.3.12.152
+${URL}          http://ethel-contentskuqe.itos.redhat.com
+#${URL}		http://account-manager-stage.app.eng.rdu2.redhat.com
 ${NEW_URL}          ${URL}/account/new
 ${ADD_URL}       	${URL}/account/attach
 ${GET_URL}          ${URL}/account/get
