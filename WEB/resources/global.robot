@@ -8,8 +8,8 @@ Library			BuiltIn
 Library			Selenium2Library    run_on_failure=Capture Page Screenshot    implicit_wait=0
 
 *** Variables ***
-${SERVER}				account-manager-stage.app.eng.rdu2.redhat.com
-#${SERVER}          http://ethel-contentskuqe.itos.redhat.com
+${SERVER}				ethel-contentskuqe.itos.redhat.com
+#account-manager-stage.app.eng.rdu2.redhat.com
 #10.3.12.152
 ${BROWSER}				firefox
 #${BROWSER}				chrome
